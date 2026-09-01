@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-08-21. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. */
 /* NetHack 5.0	winlabel.c	$NHDT-Date: 1781973110 2026/06/20 16:31:50 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.50 $ */
 /* Copyright (c) Ray Chason, 2026                                 */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -425,8 +425,9 @@ update_label(Widget w, WidgetData *data)
                     pos = data->columns[min(col, data->num_cols)];
                 }
 #ifdef USE_XFT
-                XftDrawString8(draw, &fgcolor, font, x + pos, y,
-                               (const FcChar8 *) (label + i + j), line3);
+                /* NetHackJP: X11 UTF-8 text rendering and input support */
+                XftDrawStringUtf8(draw, &fgcolor, font, x + pos, y,
+                                  (const FcChar8 *) (label + i + j), line3);
 #else
                 XDrawString(display, new_pixmap, ggc,
                             x + pos, y,
@@ -578,7 +579,8 @@ int
 X11_column_width(Display *display, X11_Font *font, const char *text, size_t length)
 {
     XGlyphInfo extents;
-    XftTextExtents8(display, font, (const FcChar8*) text, length, &extents);
+    /* NetHackJP: X11 UTF-8 text rendering and input support */
+    XftTextExtentsUtf8(display, font, (const FcChar8*) text, length, &extents);
     return extents.width - extents.x;
 }
 

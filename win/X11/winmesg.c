@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-08-21. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. */
 /* NetHack 5.0	winmesg.c	$NHDT-Date: 1781973109 2026/06/20 16:31:49 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.19 $ */
 /* Copyright (c) Dean Luick, 1992                                 */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -164,11 +164,12 @@ create_message_window(struct xwindow *wp, /* window pointer */
     mesg_info->char_lbearing = 0;
     /* Xft seems to offer no direct way to distinguish proportional from
        monospaced fonts. Assume that "!" will be narrower than maximum. */
-    XftTextExtents8(XtDisplay(wp->w), font, (const FcChar8*) "!", 1, &extents);
+    /* NetHackJP: X11 UTF-8 text rendering and input support */
+    XftTextExtentsUtf8(XtDisplay(wp->w), font, (const FcChar8*) "!", 1, &extents);
     int min_width = extents.width - extents.x;
     /* "Maximum" is likely to include things like Chinese characters that
      * display at double width. Use the width of "M". */
-    XftTextExtents8(XtDisplay(wp->w), font, (const FcChar8*) "M", 1, &extents);
+    XftTextExtentsUtf8(XtDisplay(wp->w), font, (const FcChar8*) "M", 1, &extents);
     int max_width = extents.width - extents.x;
     X11_release_font(wp->w, font);
 #else
@@ -399,7 +400,8 @@ split(
     while (TRUE) {
 #ifdef USE_XFT
         XGlyphInfo extents;
-        XftTextExtents8(XtDisplay(wp->w), font, (const FcChar8*) s, strlen(s), &extents);
+        /* NetHackJP: X11 UTF-8 text rendering and input support */
+        XftTextExtentsUtf8(XtDisplay(wp->w), font, (const FcChar8*) s, strlen(s), &extents);
         if (extents.width - extents.x < pixel_width) {
             break;
         }
@@ -523,7 +525,8 @@ redraw_message_window(struct xwindow *wp)
          row++, y_base += mesg_info->char_height, curr = curr->next) {
 #ifdef USE_XFT
         if (curr->line != NULL) {
-            XftDrawString8(draw, &fgcolor, font,
+            /* NetHackJP: X11 UTF-8 text rendering and input support */
+            XftDrawStringUtf8(draw, &fgcolor, font,
                         mesg_info->char_lbearing, mesg_info->char_ascent + y_base,
                         (const FcChar8 *) curr->line, curr->str_length);
         }

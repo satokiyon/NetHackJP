@@ -33,7 +33,7 @@ NetHack JP README
 # Linux版 NetHack起動手順
 
 1. ダウンロードしたzipファイルをすべて展開してください。
-   
+
      unzip NetHackJP-5.0.0-*-linux.zip
 
 
@@ -46,6 +46,15 @@ NetHack JP README
 3. 以下のコマンドで起動してください（TTY / ncurses インターフェース）。
 
      ./nethack
+
+   X11 GUI モードで起動する場合は以下を実行します（黒背景・白文字・白ボーダー枠線指定: `-bg black -fg white -bd white`）。
+
+     ./nethack -wX11 -bg black -fg white -bd white
+
+   【重要】X11 GUI 使用時に日本語が白四角（豆腐文字）で表示される場合は、Linux / WSL 環境に日本語 CJK フォントをインストールしてください：
+
+     sudo apt update && sudo apt install -y fonts-noto-cjk fonts-ipafont-gothic
+     fc-cache -fv
 
 
 4. 必要であれば、ご自身の環境に合わせてNetHackの設定ファイルを編集してください。

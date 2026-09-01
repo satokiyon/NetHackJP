@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-08-21. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. */
 /* NetHack 5.0	winX.c	$NHDT-Date: 1781973110 2026/06/20 16:31:50 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.150 $ */
 /* Copyright (c) Dean Luick, 1992                                 */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -1676,7 +1676,8 @@ X11_init_nhwindows(int *argcp, char **argv)
     savuid = geteuid();
     (void) seteuid(getuid());
 
-    XSetIOErrorHandler((XIOErrorHandler) X11_io_error_handler);
+    /* NetHackJP: X11 UTF-8 text rendering and input support */
+    XtSetLanguageProc(NULL, NULL, NULL);
 
     num_args = 0;
     XtSetArg(args[num_args], XtNallowShellResize, True); num_args++;

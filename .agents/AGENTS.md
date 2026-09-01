@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-01. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. -->
 # NetHackJP 開発ルール
 
 ## イベント履歴（livelog）および画面メッセージの日本語表示方針
@@ -83,9 +83,9 @@
 
 ## Linux / WSL 環境における Curses ウィンドウポート（`WANT_WIN_CURSES`）および UTF-8（`CURSES_UNICODE`）ビルド設定の制約
 
-1. **`WANT_WIN_CURSES=1` の記述位置**:
-   - `sys/unix/hints/` 内のヒントファイル（例: `linux-jp`）において、`WANT_WIN_CURSES=1` などのウィンドウポート有効化変数は、必ず `#-INCLUDE multiw-2.500` より**前**（`#-INCLUDE multiw-1.500` 直後）に記述してください。
-   - `multiw-2.500` の処理時点で変数が未定義だと、GNU Make の評価順序により `-DCURSES_GRAPHICS` マクロが `WINCFLAGS` に追加されず、`windowtype:curses` が認識されない tty 専用バイナリが生成されてしまいます。
+1. **`WANT_WIN_CURSES=1` / `WANT_WIN_X11=1` などのウィンドウポート有効化変数の記述位置**:
+   - `sys/unix/hints/` 内のヒントファイル（例: `linux-jp`）において、`WANT_WIN_CURSES=1` や `WANT_WIN_X11=1` などのウィンドウポート有効化変数は、必ず `#-INCLUDE multiw-2.500` より**前**（`#-INCLUDE multiw-1.500` 直後）に記述してください。
+   - `multiw-2.500` の処理時点で変数が未定義だと、GNU Make の評価順序により `-DCURSES_GRAPHICS` や `-DX11_GRAPHICS` マクロが `WINCFLAGS` に追加されず、`WINOBJ` にも対応するオブジェクト群が追加されないため、対象ウィンドウポートが認識されない（`Window type X11 not recognized` 等のエラーとなる）バイナリが生成されてしまいます。
 
 2. **ncursesw (UTF-8) 対応のための `HAVE_NCURSESW = 1` 指定**:
    - Linux / WSL 環境で curses インターフェースの日本語 UTF-8 表示を正しく機能させるには、ヒントファイル内で `HAVE_NCURSESW = 1` を明示的に設定してください。

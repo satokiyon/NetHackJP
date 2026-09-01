@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-08-21. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. */
 /* NetHack 5.0	wintext.c	$NHDT-Date: 1781973110 2026/06/20 16:31:50 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.35 $ */
 /* Copyright (c) Dean Luick, 1992                                 */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -510,13 +510,14 @@ rip_exposed(Widget w, XtPointer client_data UNUSED,
     for (i = 0; i <= YEAR_LINE; i++) {
         size_t len = strlen(rip_line[i]);
         XGlyphInfo extents;
-        XftTextExtents8(display, font,
-                        (const FcChar8 *) rip_line[i], len,
-                        &extents);
+        /* NetHackJP: X11 UTF-8 text rendering and input support */
+        XftTextExtentsUtf8(display, font,
+                           (const FcChar8 *) rip_line[i], len,
+                           &extents);
         int width = extents.width - extents.x;
 
-        XftDrawString8(draw, &foreground, font, x - width / 2, y,
-                       (const FcChar8 *) rip_line[i], len);
+        XftDrawStringUtf8(draw, &foreground, font, x - width / 2, y,
+                          (const FcChar8 *) rip_line[i], len);
         x += appResources.tombtext_dx;
         y += appResources.tombtext_dy;
     }

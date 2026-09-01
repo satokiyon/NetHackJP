@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-08-21. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. */
 /* NetHack 5.0	winmap.c	$NHDT-Date: 1781973109 2026/06/20 16:31:49 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.77 $ */
 /* Copyright (c) Dean Luick, 1992                                 */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -1554,7 +1554,8 @@ X11_draw_image_string(
 #ifdef ENHANCED_SYMBOLS
     XftDrawString32(draw, fgcolor, font, xt, yt, string, length);
 #else /* !ENHANCED_SYMBOLS */
-    XftDrawString8(draw, fgcolor, font, xt, yt, string, length);
+    /* NetHackJP: X11 UTF-8 text rendering and input support */
+    XftDrawStringUtf8(draw, fgcolor, font, xt, yt, string, length);
 #endif /* ?ENHANCED_SYMBOLS */
 }
 

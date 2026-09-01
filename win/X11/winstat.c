@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-08-21. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. */
 /* NetHack 5.0	winstat.c	$NHDT-Date: 1781973110 2026/06/20 16:31:50 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.50 $ */
 /* Copyright (c) Dean Luick, 1992                                 */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -842,7 +842,8 @@ tty_render_text(Widget w, const XRectangle *clip, int x, int y,
 
     /* Get the width of the rendered string, not including goldwidth */
     XGlyphInfo extents;
-    XftTextExtents8(display, font, (const FcChar8 *) text, strlen(text), &extents);
+    /* NetHackJP: X11 UTF-8 text rendering and input support */
+    XftTextExtentsUtf8(display, font, (const FcChar8 *) text, strlen(text), &extents);
     int width = extents.width - extents.x;
 
     /* Place version on the right */
@@ -860,9 +861,9 @@ tty_render_text(Widget w, const XRectangle *clip, int x, int y,
 
     /* Render the string */
     XftDrawRect(draw, &bgcolor, x + goldwidth, y, width, height);
-    XftDrawString8(draw, &fgcolor, font,
-                   x + goldwidth, y + font->ascent,
-                     (const FcChar8 *) text, strlen(text));
+    XftDrawStringUtf8(draw, &fgcolor, font,
+                      x + goldwidth, y + font->ascent,
+                      (const FcChar8 *) text, strlen(text));
     width += goldwidth;
 
 #ifdef STATUS_HILITES

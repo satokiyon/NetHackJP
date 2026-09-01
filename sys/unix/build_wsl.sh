@@ -1,4 +1,4 @@
-# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-01.
+# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02.
 #!/bin/sh
 # NetHackJP build script for WSL (Linux)
 # Usage: ./sys/unix/build_wsl.sh [hints_file]
@@ -38,7 +38,7 @@ if [ $HAS_CURSES -eq 0 ]; then
     echo "--------------------------------------------------------"
     echo "[!] Error: ncurses development library/headers (libncursesw5-dev) not found."
     echo "    To fix this issue, please run the following command in WSL:"
-    echo "    sudo apt update && sudo apt install -y build-essential libncursesw5-dev liblua5.4-dev pkg-config"
+    echo "    sudo apt update && sudo apt install -y build-essential libncursesw5-dev liblua5.4-dev pkg-config libx11-dev libxft-dev libxpm-dev libxaw7-dev libxt-dev"
     echo "--------------------------------------------------------"
     exit 1
 fi
@@ -54,14 +54,14 @@ rm -f src/hacklib.a src/*.o util/*.o
 echo "Building prerequisites (lua_support)..."
 make lua_support
 
-echo "Starting main build with sequential make (tty & curses interfaces)..."
+echo "Starting main build with sequential make (tty, curses & X11 interfaces)..."
 
-make WANT_WIN_CURSES=1 WANT_WIN_TTY=1 WANT_DEFAULT=tty all
+make WANT_WIN_CURSES=1 WANT_WIN_TTY=1 WANT_WIN_X11=1 WANT_DEFAULT=tty all
 
 echo "=========================================="
 echo "Build complete! Executable is located at src/nethack."
-echo "Both 'tty' and 'curses' window ports are included."
+echo "All 'tty', 'curses' and 'X11' window ports are included."
 echo ""
 echo "Next step: Run 'make install' to install into playground/."
-echo "Then execute: ./playground/nethack"
+echo "Then execute: ./playground/nethack (or ./playground/nethack -wX11 for X11 GUI)"
 echo "=========================================="

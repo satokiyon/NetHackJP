@@ -30,6 +30,9 @@ NetHack*text*borderWidth:  0
 ! Vector font to be used if Xft support is enabled
 ! These correspond to the .nethackrc settings font_map, font_menu,
 ! font_message, font_status and font_text
+! For Japanese display under NetHackJP, Fontconfig automatically falls back to CJK fonts
+! (e.g. Noto Sans CJK JP / IPAGothic), or you can explicitly specify them:
+! NetHack.font_menu: Noto Sans CJK JP-10,sans-10
 NetHack.font_map:     mono-10
 NetHack.font_menu:    sans-10
 NetHack.font_message: sans-10

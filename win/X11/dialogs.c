@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-08-21. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. */
 /*
  * Copyright 1991 University of Wisconsin-Madison
  *
@@ -151,6 +151,8 @@ CreateDialog(Widget parent, String name, XtCallbackProc okay_callback,
     XtSetArg(args[num_args], nhStr(XtNeditType), XawtextEdit); num_args++;
     XtSetArg(args[num_args], nhStr(XtNresize), XawtextResizeWidth); num_args++;
     XtSetArg(args[num_args], nhStr(XtNstring), ""); num_args++;
+    /* NetHackJP: X11 UTF-8 text rendering and input support */
+    XtSetArg(args[num_args], nhStr(XtNinternational), True); num_args++;
     response = XtCreateManagedWidget("response", asciiTextWidgetClass, form,
                                      args, num_args);
 

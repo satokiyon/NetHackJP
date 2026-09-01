@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-01. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. -->
 <!--
   IMPORTANT POLICY FOR NetHackJP-ONLY MODIFICATIONS
   =================================================
@@ -48,7 +48,7 @@
 Linux (Ubuntu / Debian 等) 上でビルドを行う場合は、事前に以下のパッケージをインストールしてください。
 ```bash
 sudo apt update
-sudo apt install build-essential libncursesw5-dev liblua5.4-dev pkg-config gdb
+sudo apt install build-essential libncursesw5-dev liblua5.4-dev pkg-config gdb libx11-dev libxft-dev libxpm-dev libxaw7-dev libxt-dev
 ```
 
 | パッケージ | 用途 |
@@ -58,11 +58,12 @@ sudo apt install build-essential libncursesw5-dev liblua5.4-dev pkg-config gdb
 | `liblua5.4-dev` | Lua 5.4 組み込みスクリプトエンジン |
 | `pkg-config` | ライブラリのコンパイルフラグ解決 |
 | `gdb` | パニックトレース (`PANICTRACE_GDB`) によるクラッシュ解析。実行時に必要 |
+| `libx11-dev` / `libxft-dev` / `libxaw7-dev` 等 | X11 GUI ポート (UTF-8 Xft / Athena Widgets) のビルド・描画ライブラリ |
 
 > [!NOTE]
 > `gdb` は **実行時**にも参照されます。`sysconf` の `PANICTRACE_GDB=1` が有効な状態で `gdb` が存在しない場合、クラッシュ時に追加のバックトレース情報が取れないだけでなく、起動に失敗するケースもあります。インストールしておくことを強く推奨します。
 
-*GUI ポート（X11 や Qt）のコンパイルも行う場合は、必要に応じて `libx11-dev`, `libxpm-dev`, `qtbase5-dev` 等も追加導入してください。*
+*GUI ポート（X11 や Qt）のコンパイルを行う場合は、上記パッケージを事前導入してください。*
 
 ---
 
@@ -134,13 +135,18 @@ nethack
   ```text
   OPTIONS=windowtype:curses,align_message:top,align_status:right
   ```
+- **X11 GUI インターフェース**:
+  ```text
+  OPTIONS=windowtype:X11
+  ```
+  *(またはコマンドライン引数 `playground/nethack -wX11` や `-windowtype X11` で起動。リポジトリ直下のサンプル設定ファイル `.nethackrc.X11` を `~/.nethackrc` としてコピーして利用可能です)*
 - **tty インターフェース（デフォルト）**:
   ```text
   OPTIONS=windowtype:tty
   ```
 
 > [!NOTE]
-> `hints/linux-jp` 内で `HAVE_NCURSESW = 1` が定義されているため、`curses` 使用時には自動的に `-DCURSES_UNICODE` が有効化され、`setlocale(LC_CTYPE, "")` により UTF-8 日本語テキストが正常に表示されます。
+> `hints/linux-jp` 内で `WANT_WIN_X11 = 1` および `HAVE_NCURSESW = 1` が定義されているため、生成されるバイナリは `tty`, `curses`, `X11` の 3 ポートマルチウィンドウに対応します。`X11` 使用時には Xft による日本語 TrueType/OpenType フォント描画および XIM ロケール入力（`XtSetLanguageProc`）により、GUI 上で UTF-8 日本語表示・入力が正常に行われます。
 
 #### 2.2.3. まとめ（WSL での初回セットアップ全体フロー）
 
@@ -404,6 +410,23 @@ Linux/UNIX 環境の TTY モード（`wintty.c`）において、`DEF_PAGER`（�
   - この変更により、指定 `fname` に対してまず `_jp` 付き実ファイルの `open()` を試み、失敗した場合は内部ページャー（`dlb_fopen`）へフォールバックして DLB 内の日本語ヘルプファイルを画面表示できるようにした。
 * **アップストリーム追従手順**:
   - アップストリームで外部ページャーの `open()` 処理や `display_file` の仕様が変更された場合、本マーカータグのブロックを確認し、`_jp` 付きファイル検索と `dlb_fopen` フォールバックのロジックを保持した状態で競合解決を行ってください。
+
+### 8. Linux/WSL X11 GUI ポートにおける UTF-8 日本語描画・入力対応
+Linux/UNIX 環境の X11 ウィンドウポート（`win/X11`）において、Xft (FreeType/Fontconfig) および Athena Widgets (`AsciiText`) を拡張し、日本語 UTF-8 テキストの正常な描画と XIM ロケール入力（`XtSetLanguageProc`）を有効化しました。
+
+* **マーカータグ**: `/* NetHackJP: X11 UTF-8 text rendering and input support */`
+* **対象ファイル**:
+  1. **`sys/unix/hints/linux-jp`**: `WANT_WIN_X11=1` を有効化し、`tty`, `curses`, `X11` の 3 ポートマルチバイナリ生成に対応。
+  2. **`win/X11/winlabel.c`**: `XftDrawString8` / `XftTextExtents8` を `XftDrawStringUtf8` / `XftTextExtentsUtf8` に更新。
+  3. **`win/X11/wintext.c`**: 墓石（RIP）画面等での描画・テキスト幅算出を `XftTextExtentsUtf8` / `XftDrawStringUtf8` に更新。
+  4. **`win/X11/winmesg.c`**: メッセージウィンドウの Xft 描画部を UTF-8 ワイド文字表示に更新。
+  5. **`win/X11/winmap.c`**: マップ描画部の `XftDrawString8` を `XftDrawStringUtf8` に更新。
+  6. **`win/X11/winstat.c`**: ステータス表示の `XftTextExtents8` / `XftDrawString8` を `XftTextExtentsUtf8` / `XftDrawStringUtf8` に更新。
+  7. **`win/X11/winX.c`**: `X11_init_nhwindows` で `XtSetLanguageProc(NULL, NULL, NULL)` を呼び出し、XIM ロケール接続を初期化。
+  8. **`win/X11/dialogs.c`**: ダイアログの `AsciiText` Widget で `XtNinternational` (`international: True`) を有効化し、日本語テキスト受領に対応。
+  9. **`win/X11/NetHack.ad`**: Xft デフォルトフォント注釈に CJK 日本語フォント（`Noto Sans CJK JP` 等）のフォールバックガイドを追加。
+* **アップストリーム追従手順**:
+  - アップストリームで X11 ポートの Xft UTF-8 化や Pango/Cairo への置き換えが入った場合は、本変更箇所を取り消してアップストリームに追従してください。
 
 ---
 
