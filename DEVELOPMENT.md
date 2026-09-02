@@ -429,6 +429,18 @@ Linux/UNIX 環境の X11 ウィンドウポート（`win/X11`）において、X
 * **アップストリーム追従手順**:
   - アップストリームで X11 ポートの Xft UTF-8 化や Pango/Cairo への置き換えが入った場合は、本変更箇所を取り消してアップストリームに追従してください。
 
+### 9. X11 ポートにおける未初期化 XFontStruct ポインタ参照保護
+WSL環境などの X11 ポート (`-wX11`) において、`XtNinternational = True` 指定により `XtGetValues` で `XtNfont` が返されなかった場合に未初期化の `XFontStruct *` ポインタをデリファレンスして Signal 11 (Segmentation Fault) によりクラッシュする問題を修正するための安全ガードです。
+* **マーカータグ**: 
+  - `/* NetHackJP: uninitialized XFontStruct pointer guard under XtNinternational */`
+  - `/* NetHackJP: uninitialized XFontStruct pointer guard */`
+* **対象ファイル**:
+  1. **`win/X11/dialogs.c`**: `SetDialogResponse()` 内の `XFontStruct *font` を NULL 初期化し、フォールバック幅計算を追加。
+  2. **`win/X11/winstat.c`**: `create_status_window_fancy()` および `display_status_line()` 内の `fs` / `font` を NULL 初期化し、ガードを追加。
+  3. **`win/X11/winX.c`**: `set_bold_font()`、`nhFontHeight()` 内の `fs` を NULL 初期化し、`yn_font` の `XTextWidth` 呼び出しに NULL ガードを追加。
+* **アップストリーム追従手順**:
+  - アップストリームで未初期化 `XFontStruct *` ローカル変数の `NULL` 初期化や安全な判定が入った場合は、本変更を取り消して追従する。
+
 ---
 
 

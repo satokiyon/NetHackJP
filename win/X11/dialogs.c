@@ -270,8 +270,9 @@ SetDialogResponse(Widget w, String s, unsigned ln)
 {
     Arg args[4];
     Widget response;
-    XFontStruct *font;
-    Dimension width, nwidth, leftMargin, rightMargin;
+    /* NetHackJP: uninitialized XFontStruct pointer guard under XtNinternational */
+    XFontStruct *font = (XFontStruct *) 0;
+    Dimension width = 0, nwidth = 0, leftMargin = 0, rightMargin = 0;
     unsigned s_len = strlen(s);
 
     if (s_len < ln)

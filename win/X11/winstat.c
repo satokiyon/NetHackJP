@@ -885,7 +885,7 @@ tty_render_text(Widget w, const XRectangle *clip, int x, int y,
     Arg args[5];
     Cardinal num_args;
     XGCValues values;
-    XFontStruct *font;
+    XFontStruct *font = (XFontStruct *) 0;
     XFontStruct *font_italic = NULL; /* custodial */
 
     values.foreground = fgpixel;
@@ -900,11 +900,12 @@ tty_render_text(Widget w, const XRectangle *clip, int x, int y,
     if (attr & HL_BOLD) {
         struct xwindow *wp = find_widget(w);
         load_boldfont(wp, w);
-        font = wp->boldfs;
+        if (wp->boldfs)
+            font = wp->boldfs;
     }
 
     /* Implement italic font */
-    if (attr & HL_ITALIC) {
+    if (attr & HL_ITALIC && font) {
         /* font may also be bold */
         font_italic = X11_italic_font(XtDisplay(w), font);
         if (font_italic != NULL) {
@@ -913,7 +914,7 @@ tty_render_text(Widget w, const XRectangle *clip, int x, int y,
     }
 
     /* Get a graphics context */
-    values.font = font->fid;
+    values.font = font ? font->fid : None;
     values.function = GXcopy;
     GC ggc = XtGetGC(w,
                      GCFunction | GCForeground | GCBackground | GCFont,
@@ -1187,10 +1188,11 @@ void
 create_status_window_fancy(struct xwindow *wp, /* window pointer */
                            boolean create_popup, Widget parent)
 {
-    XFontStruct *fs;
+    /* NetHackJP: uninitialized XFontStruct pointer guard */
+    XFontStruct *fs = (XFontStruct *) 0;
     Arg args[8];
     Cardinal num_args;
-    Position top_margin, bottom_margin, left_margin, right_margin;
+    Position top_margin = 0, bottom_margin = 0, left_margin = 0, right_margin = 0;
 
     wp->type = NHW_STATUS;
 
@@ -1252,8 +1254,9 @@ create_status_window_fancy(struct xwindow *wp, /* window pointer */
              &right_margin); num_args++;
     XtGetValues(wp->w, args, num_args);
 
+    int font_width = (fs && fs->max_bounds.width > 0) ? fs->max_bounds.width : 10;
     wp->pixel_height = 2 * nhFontHeight(wp->w, NHW_STATUS) + top_margin + bottom_margin;
-    wp->pixel_width = COLNO * fs->max_bounds.width
+    wp->pixel_width = COLNO * font_width
                     + left_margin + right_margin;
 
     /* Set the new width and height. */

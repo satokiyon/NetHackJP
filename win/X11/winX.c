@@ -744,7 +744,8 @@ void
 load_boldfont(struct xwindow *wp, Widget w)
 {
     Arg args[1];
-    XFontStruct *fs;
+    /* NetHackJP: uninitialized XFontStruct pointer guard */
+    XFontStruct *fs = (XFontStruct *) 0;
     unsigned long ret;
     char *fontname;
     Display *dpy;
@@ -755,7 +756,7 @@ load_boldfont(struct xwindow *wp, Widget w)
     XtSetArg(args[0], nhStr(XtNfont), &fs);
     XtGetValues(w, args, 1);
 
-    if (!XGetFontProperty(fs, XA_FONT, &ret))
+    if (!fs || !XGetFontProperty(fs, XA_FONT, &ret))
         return;
 
     wp->boldfs_dpy = dpy = XtDisplay(w);
@@ -808,7 +809,7 @@ nhFontHeight(Widget w, int win_type)
 #else /* !USE_XFT */
 
     Arg args[1];
-    XFontStruct *fs;
+    XFontStruct *fs = (XFontStruct *) 0;
 
     nhUse(win_type);
 
@@ -829,8 +830,8 @@ nhFontHeight(Widget w, int win_type)
     XtSetArg(args[0], XtNfont, &fs);
     XtGetValues(w, args, 1);
 
-    /* Assume font height is ascent + descent. */
-    return fs->ascent + fs->descent;
+    /* Assume font height is ascent + descent, or 14 as default fallback. */
+    return fs ? (fs->ascent + fs->descent) : 14;
 
 #endif /* ?USE_XFT */
 }
@@ -2488,8 +2489,8 @@ X11_yn_function_core(
             /* set up minimum yn_label width; we don't actually set
                the XtNminWidth attribute */
             (void) memset(buf2, 'X', 25), buf2[25] = '\0'; /* 25 'X's */
-            yn_minwidth = (Dimension) XTextWidth(yn_font, buf2,
-                                                 (int) strlen(buf2));
+            yn_minwidth = yn_font ? (Dimension) XTextWidth(yn_font, buf2,
+                                                 (int) strlen(buf2)) : 250;
             X11_wrap_widget_if_Xft(yn_label, NHW_MESSAGE);
         }
     }
@@ -2521,7 +2522,8 @@ X11_yn_function_core(
         XtSetArg(args[num_args], XtNwidth, &labelwidth); num_args++;
         XtGetValues(yn_label, args, num_args);
 
-        promptwidth = (Dimension) XTextWidth(yn_font, buf, (int) strlen(buf));
+        promptwidth = yn_font ? (Dimension) XTextWidth(yn_font, buf, (int) strlen(buf))
+                              : (Dimension) (strlen(buf) * 10);
         if (labelwidth != promptwidth || labelwidth < yn_minwidth) {
             labelwidth = max(promptwidth, yn_minwidth);
             (void) memset((genericptr_t) args, 0, sizeof args);
