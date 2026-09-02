@@ -7,8 +7,10 @@
 # Set windowtype to X11 for Graphical UI
 OPTIONS=windowtype:X11
 # Note: The X11 window port controls window background & border colors via X11 resources or command line arguments.
-#       To start NetHack X11 with a dark background and white window borders, run:
-#       ./playground/nethack -wX11 -bg black -fg white -bd white
+#       NetHack.ad is copied to the game directory (e.g. playground) upon installation.
+#       To start NetHack X11 with a dark background and white window borders, run from the game directory:
+#       XAPPLRESDIR=. ./nethack -wX11 -bg black -fg white -bd white
+#       (Or from the repository root: XAPPLRESDIR=./playground ./playground/nethack -wX11 -bg black -fg white -bd white)
 # OPTIONS=align_message:top
 # OPTIONS=align_status:right
 OPTIONS=symset:Enhanced2,roguesymset:RogueEpyx
@@ -22,10 +24,10 @@ OPTIONS=suppress_alert:3.3.1
 # Fontconfig / Xft fonts for Linux/WSL X11 (supports Noto Sans CJK JP, DejaVu Sans, etc.)
 # If no font is specified, NetHack.ad / Fontconfig default fallbacks will be used.
 OPTIONS=font_map:mono-10
-OPTIONS=font_menu:Noto Sans CJK JP-10,sans-10
-OPTIONS=font_message:Noto Sans CJK JP-10,sans-10
-OPTIONS=font_status:Noto Sans CJK JP-10,sans-10
-OPTIONS=font_text:Noto Sans CJK JP-10,mono-10
+OPTIONS=font_menu:Noto Sans CJK JP-10
+OPTIONS=font_message:Noto Sans CJK JP-10
+OPTIONS=font_status:Noto Sans CJK JP-10
+OPTIONS=font_text:Noto Sans CJK JP-10
 
 
 OPTIONS=hilite_pet,toptenwin
@@ -86,7 +88,7 @@ OPTIONS=hitpointbar
 
 # HP
 OPTIONS=hilite_status:hitpoints/100%/gray&bold
-OPTIONS=hilite_status:hitpoints/<100%/brightgreen&bold
+OPTIONS=hilite_status:hitpoints/<100%/green&bold
 OPTIONS=hilite_status:hitpoints/<66%/yellow&bold
 OPTIONS=hilite_status:hitpoints/<50%/orange&bold
 OPTIONS=hilite_status:hitpoints/<33%/red&bold
@@ -94,7 +96,7 @@ OPTIONS=hilite_status:hitpoints/<15%/red&inverse&bold
 
 # Pw
 OPTIONS=hilite_status:power/100%/gray&normal
-OPTIONS=hilite_status:power/<100%/brightgreen&normal
+OPTIONS=hilite_status:power/<100%/green&normal
 OPTIONS=hilite_status:power/<66%/yellow&normal
 OPTIONS=hilite_status:power/<50%/orange&normal
 OPTIONS=hilite_status:power/<33%/red&bold
@@ -110,12 +112,12 @@ OPTIONS=hilite_status:condition/movement/light-blue&bold
 
 # Gold & Stats
 OPTIONS=hilite_status:gold/up/yellow/down/brown
-OPTIONS=hilite_status:characteristics/up/brightgreen/down/red
-OPTIONS=hilite_status:armor-class/up/red/down/brightgreen
-OPTIONS=hilite_status:experience-level/up/brightgreen/down/red
-OPTIONS=hilite_status:HD/up/brightgreen/down/red
-OPTIONS=hilite_status:hitpoints-max/up/brightgreen/down/red
-OPTIONS=hilite_status:power-max/up/brightgreen/down/red
+OPTIONS=hilite_status:characteristics/up/green/down/red
+OPTIONS=hilite_status:armor-class/up/red/down/green
+OPTIONS=hilite_status:experience-level/up/green/down/red
+OPTIONS=hilite_status:HD/up/green/down/red
+OPTIONS=hilite_status:hitpoints-max/up/green/down/red
+OPTIONS=hilite_status:power-max/up/green/down/red
 OPTIONS=hilite_status:alignment/change/orange&bold
 OPTIONS=hilite_status:dungeon-level/change/light-blue&bold
 

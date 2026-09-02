@@ -96,6 +96,7 @@ jobs:
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 export HACKDIR="$SCRIPT_DIR"
 export NETHACKDIR="$SCRIPT_DIR"
+export XAPPLRESDIR="$SCRIPT_DIR"
 exec "$SCRIPT_DIR/nethack.bin" "$@"
 EOF
 
@@ -104,6 +105,7 @@ EOF
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 export HACKDIR="$SCRIPT_DIR"
 export NETHACKDIR="$SCRIPT_DIR"
+export XAPPLRESDIR="$SCRIPT_DIR"
 exec "$SCRIPT_DIR/nethack.bin" -wX11 -bg black -fg white -bd white "$@"
 EOF
           chmod +x nethack nethackW nethack.bin

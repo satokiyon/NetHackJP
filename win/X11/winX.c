@@ -408,13 +408,19 @@ init_menu_nhcolors(struct xwindow *wp)
             (void) strncpy(tmpbuf, (char *) value.addr, (int) value.size);
             tmpbuf[value.size] = '\0';
             /* tmpbuf now contains the color name from the named resource */
+            /* trim trailing whitespace or newlines */
+            char *p = tmpbuf + strlen(tmpbuf) - 1;
+            while (p >= tmpbuf && (*p == ' ' || *p == '\t' || *p == '\r' || *p == '\n')) {
+                *p-- = '\0';
+            }
 
             rc = XAllocNamedColor(dpy, screen_colormap, tmpbuf,
                                   &wp->nh_colors[color],
                                   &wp->nh_colors[color]);
             if (rc == 0) {
-                impossible("XAllocNamedColor failed for color %i (%s)",
-                           color, clr_name);
+                /* Fallback to default color pixel if allocation failed */
+                if (color > 0)
+                    wp->nh_colors[color] = wp->nh_colors[0];
             }
         }
     }

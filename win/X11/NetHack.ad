@@ -18,6 +18,12 @@
 ! The rip window applies if the GRAPHIC_TOMBSTONE option is turned on, and
 ! requires a 12 pixel font for correct appearance.
 !
+NetHack*borderColor:         white
+NetHack*Paned*internalBorderColor: white
+NetHack*Paned*internalBorderWidth: 2
+NetHack*Paned*sashColor:           white
+NetHack*Paned*sash.background:     white
+NetHack*Paned*sash.borderColor:    white
 NetHack*font:              NETHACK_FONT
 NetHack*display_file*font: NETHACK_FONT
 NetHack*map*font:          NETHACK_FONT

@@ -283,7 +283,8 @@ SetDialogResponse(Widget w, String s, unsigned ln)
     XtSetArg(args[3], nhStr(XtNwidth), &width);
     XtGetValues(response, args, FOUR);
     /* width includes margins as per Xaw documentation */
-    nwidth = font->max_bounds.width * (s_len + 1) + leftMargin + rightMargin;
+    int char_width = (font && font->max_bounds.width > 0) ? font->max_bounds.width : 10;
+    nwidth = char_width * (s_len + 1) + leftMargin + rightMargin;
     if (nwidth < width)
         nwidth = width;
 
