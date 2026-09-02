@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-01. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. -->
 # NetHack 5.0 日本語化非公式プロジェクト
 
 NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.nethack.org/)5.0 を日本語で快適にプレイできるようにすることを目的とした非公式プロジェクトです。(対象OSはWindowsとUbuntu(WSL)のみ)
@@ -26,17 +26,17 @@ NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.net
 
 ### 1. 導入手順
 
-ゲームをプレイするには、[GitHubのReleasesページ](https://github.com/satokiyon/NetHackJP/releases) からビルド済みのWindows用実行ファイル（`NetHack.exe` / `NetHackW.exe`）を含むZIPファイルをダウンロードしてください。
+ゲームをプレイするには、[GitHubのReleasesページ](https://github.com/satokiyon/NetHackJP/releases) からビルド済みのZIPファイル（Windows用およびLinux用）をダウンロードしてください。
 
 ※Android版をプレイしたい場合は[Google PlayのDartHackのページ](https://play.google.com/store/apps/details?id=jp.satokiyo.darthack)からインストールしてください
 
 ※最新の開発版をプレイしたい場合はご自身でビルドする必要があります（ビルド方法は後述の「開発者向け情報」を参照してください）。
 
-#### NetHackJP起動手順
+#### Windows版 NetHackJP起動手順
 
 ※参考 : [NetHack 5.0.0 Windows Port](https://nethack.org/v500/ports/download-win.html)
 
-1. ダウンロードしたZIPファイルをすべて展開してください。
+1. ダウンロードしたZIPファイル（`NetHackJP-5.0.0-*-windows.zip`）をすべて展開してください。
    （※ZIPファイルの中にファイルがある状態で実行ファイルを起動しないでください）
 
 2. 必要であれば、ご自身の環境に合わせてNetHackの設定ファイルを編集してください。
@@ -51,13 +51,34 @@ NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.net
    * **`NetHack.exe`** （コンソール版）
    * **`NetHackW.exe`** （GUI版）
 
+#### Linux版 NetHackJP起動手順
+
+1. [GitHubのReleasesページ](https://github.com/satokiyon/NetHackJP/releases) から最新の `NetHackJP-5.0.0-*-linux.zip` をダウンロードしてください。
+
+2. ターミナルでZIPファイルを解凍し、展開されたフォルダへ移動します。
+   ```bash
+   unzip NetHackJP-5.0.0-*-linux.zip
+   cd NetHackJP-5.0.0-*-linux
+   ```
+
+3. 必要に応じて実行権限が付与されているか確認・付与してください。
+   ```bash
+   chmod +x nethack nethackW nethack.bin
+   ```
+
+4. 次のどちらかのスクリプトを起動してください。
+   * **`./nethack`** （コンソール版 TTY / ncurses）
+   * **`./nethackW`** （GUI版 X11 - 黒背景・白文字表示）
+
+※ GUIモード起動時に日本語や墓石の文字が白四角（豆腐文字）で表示される場合は、環境に日本語 CJK フォントパッケージを導入してください（例: `sudo apt update && sudo apt install -y fonts-noto-cjk`）。
+
 
 - `.nethackrc` に設定できる各種オプションやゲーム内容に関する説明は、`Guidebook_JP.txt` を参照してください。
 
 ---
 
 ### 2. 日本語入力と対応機能
-Windows版では、ゲーム内での日本語入力・表示に対応しています。以下の項目で日本語と英語のどちらも使用可能です。
+Windows版およびLinux(X11)版では、ゲーム内での日本語入力・表示に対応しています。以下の項目で日本語と英語のどちらも使用可能です。
 * 主人公キャラの名前
 * アイテムやモンスターへの命名（名前付け）
 * 階層ごとのメモ
@@ -72,7 +93,7 @@ NetHack はテキスト（ASCII文字）だけでなく、美しいグラフィ�
 
 ※NetHack 5.0対応のタイルセットを使用する必要があります
 
-#### 設定手順
+#### Windows版 設定手順
 1. 好みのタイルセットをダウンロードし、BMP形式に変換します。
    * 参考リンク
      * [NetHackWiki Tileset 一覧](https://nethackwiki.com/wiki/Tileset)
@@ -86,9 +107,24 @@ NetHack はテキスト（ASCII文字）だけでなく、美しいグラフィ�
    * `tile_file`: 使用する BMP ファイル名（または絶対パス）を指定します。
    * `tile_width` / `tile_height`: タイルのピクセルサイズ（例: 32x32 なら `32`）を指定します。
 
-#### タイル画像の配置場所
+##### タイル画像の配置場所
 * 相対パスで指定する場合、実行ファイル（`NetHack.exe` / `NetHackW.exe`）と同じフォルダに置くのが確実です。
 * サブフォルダに置く場合は `OPTIONS=tile_file:tiles/your_tiles.bmp` のように相対パスで指定できます。
+
+#### Linux (X11 GUI) でのタイルセット変更手順
+Linux版 (X11 GUI) でグラフィックタイル表示を利用する場合のカスタム手順です。
+
+1. **ファイル名固定仕様 (`x11tiles`)**:
+   X11 ポートで読み込まれるタイル画像ファイル名は **`x11tiles`** (XPM形式) に固定されています。
+2. **タイルセット画像の変更手順**:
+   お好みの XPM 画像を用意し、ファイル名を `x11tiles` に変更して、実行ディレクトリ（解凍したフォルダ内）の既存 `x11tiles` に上書き・置換します。
+3. **タイルサイズの自動判定**:
+   NetHackJP の X11 ポートは画像から 1 タイルのセルサイズ（16x16, 32x32 等）を自動判定します。設定ファイルでのサイズ固定指定は不要で、高解像度タイルを配置するだけで自動適応されます。
+4. **設定ファイル (`.nethackrc`) 例**:
+   ```ini
+   OPTIONS=windowtype:X11
+   OPTIONS=map_mode:tiles
+   ```
 
 ---
 
