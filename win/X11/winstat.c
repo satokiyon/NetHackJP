@@ -699,19 +699,19 @@ tty_render_field(Widget w, int x, int y, int spacing, enum statusfields fld)
         const char *post;
     } formats[MAXBLSTATS] = {
         [BL_TITLE] = { NULL, NULL },
-        [BL_STR] = { "St:", NULL },
-        [BL_DX] = { "Dx:", NULL },
-        [BL_CO] = { "Co:", NULL },
-        [BL_IN] = { "In:", NULL },
-        [BL_WI] = { "Wi:", NULL },
-        [BL_CH] = { "Ch:", NULL },
+        [BL_STR] = { "筋:", NULL },
+        [BL_DX] = { "器:", NULL },
+        [BL_CO] = { "耐:", NULL },
+        [BL_IN] = { "知:", NULL },
+        [BL_WI] = { "賢:", NULL },
+        [BL_CH] = { "魅:", NULL },
         [BL_ALIGN] = { NULL, NULL },
-        [BL_SCORE] = { "S:", NULL },
+        [BL_SCORE] = { "得:", NULL },
         [BL_CAP] = { NULL, NULL },
         [BL_GOLD] = { NULL, NULL },
-        [BL_ENE] = { "Pw:", NULL },
+        [BL_ENE] = { "魔:", NULL },
         [BL_ENEMAX] = { "(", ")" },
-        [BL_XP] = { "Xp:", NULL },
+        [BL_XP] = { "LV:", NULL },
         [BL_AC] = { "AC:", NULL },
         [BL_HD] = { "HD:", NULL },
         [BL_TIME] = { "T:", NULL },
@@ -1379,80 +1379,80 @@ static struct X_status_value shown_stats[NUM_STATS] = {
     /* 0 */
     { "",             SV_NAME,  W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
     /* 1 */
-    { "Strength",     SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Dexterity",    SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Constitution", SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Intelligence", SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "筋力",         SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "器用",         SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "耐久",         SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "知力",         SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
     /* 5 */
-    { "Wisdom",       SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Charisma",     SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "賢明",         SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "魅力",         SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
     /* F_NAME: 7 */
     { "",             SV_LABEL, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
     /* F_DLEVEL: 8 */
     { "",             SV_LABEL, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Gold",         SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "金貨",         SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
     /* F_HP: 10 */
-    { "Hit Points",   SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Max HP",       SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Power",        SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Max Power",    SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Armor Class",  SV_VALUE, W0, 256L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "HP",           SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "最大HP",       SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "PW",           SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "最大PW",       SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "AC",           SV_VALUE, W0, 256L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
     /* F_XP_LEVL: 15 */
-    { "Xp Level",     SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "レベル",       SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
     /* also 15 (overloaded field) */
     /*{ "Hit Dice",   SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },*/
     /* F_EXP_PTS: 16 (optionally displayed) */
-    { "Exp Points",   SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Alignment",    SV_VALUE, W0,  -2L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "経験値",       SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "属性",         SV_VALUE, W0,  -2L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
     /* 18, optionally displayed */
-    { "Time",         SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "ターン",       SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
     /* 19, conditionally present, optionally displayed when present */
-    { "Score",        SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "スコア",       SV_VALUE, W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
     /* F_HUNGER: 20 (blank if 'normal') */
     { "",             SV_NAME,  W0,  -1L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
     /* F_ENCUMBER: 21 (blank if unencumbered) */
     { "",             SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Trapped",      SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Tethered",     SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Levitating",   SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "罠",           SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "連結",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "浮遊",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
     /* 25 */
-    { "Flying",       SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Riding",       SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Grabbed!",     SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "飛行",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "騎乗",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "捕縛",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
     /* F_STONE: 28 */
-    { "Petrifying",   SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Slimed",       SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "石化",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "粘液",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
     /* 30 */
-    { "Strangled",    SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Food Pois",    SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Term Ill",     SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "絞首",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "食中毒",       SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "病気",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
     /* F_IN_LAVA: 33 */
-    { "Sinking",      SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Held",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "溶岩",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "拘束",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
     /* 35 */
-    { "Holding",      SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Blind",        SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Deaf",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Stunned",      SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Confused",     SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    /* F_HALLU: 40 (full spelling truncated due to space limitations) */
-    { "Hallucinat",   SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "保持",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "盲目",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "難聴",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "朦朧",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "混乱",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    /* F_HALLU: 40 */
+    { "幻覚",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
     /* F_VERS; optionally shown, generally treated as a pseudo-condition */
     { "Version 1.2.3", SV_LABEL, W0,  0L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Weapon",       SV_NAME,  W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Armor",        SV_NAME,  W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "Terrain",      SV_NAME,  W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
-    { "BareHands",    SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "GlowHands",    SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Icy",          SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Busy",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Paralyzed",    SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Sleeping",     SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Unconsc",      SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "ElfIron",      SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Slippery",     SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "Submerged",    SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
-    { "HurtLegs",     SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "武器",         SV_NAME,  W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "防具",         SV_NAME,  W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "地形",         SV_NAME,  W0,  -1L, 0, FALSE, FALSE, FALSE, P0, 0, 0 },
+    { "素手",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "発光",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "氷上",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "多忙",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "麻痺",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "睡眠",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "失神",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "鉄過敏",       SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "滑手",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "水没",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
+    { "脚傷",         SV_NAME,  W0,   0L, 0, FALSE, TRUE,  FALSE, P0, 0, 0 },
 };
 #undef W0
 #undef P0
@@ -1622,10 +1622,10 @@ update_val(struct X_status_value *attr_rec, long new_value, const char *new_valu
 
         /* special cases: hunger and encumbrance */
         if (attr_rec == &shown_stats[F_HUNGER]) {
-            Strcpy(buf, hu_stat[new_value]);
+            Strcpy(buf, jp_hunger_status_for_display((int) new_value, FALSE));
             (void) mungspaces(buf);
         } else if (attr_rec == &shown_stats[F_ENCUMBER]) {
-            Strcpy(buf, enc_stat[new_value]);
+            Strcpy(buf, encumbrance_display_text((int) new_value));
         } else if (new_value) {
             Strcpy(buf, attr_rec->name); /* condition name On */
         /* Special cases: weapon, armor and terrain */
@@ -1696,7 +1696,7 @@ update_val(struct X_status_value *attr_rec, long new_value, const char *new_valu
         } else if (attr_rec == &shown_stats[F_XP_LEVL]) {
             if (Upolyd && !Xp_was_HD) {
                 force_update = TRUE;
-                set_name(attr_rec->w, "Hit Dice");
+                set_name(attr_rec->w, "魔レベル");
                 Xp_was_HD = TRUE;
             } else if (!Upolyd && Xp_was_HD) {
                 force_update = TRUE;
@@ -1740,8 +1740,8 @@ update_val(struct X_status_value *attr_rec, long new_value, const char *new_valu
                 Sprintf(buf, fmt, new_value, padding); /* 3..25 */
             }
         } else if (attr_rec == &shown_stats[F_ALIGN]) {
-            Strcpy(buf, (new_value == A_CHAOTIC) ? "Chaotic"
-                        : (new_value == A_NEUTRAL) ? "Neutral" : "Lawful");
+            Strcpy(buf, (new_value == A_CHAOTIC) ? "混沌"
+                        : (new_value == A_NEUTRAL) ? "中立" : "秩序");
         } else {
             Sprintf(buf, "%ld", new_value);
         }
