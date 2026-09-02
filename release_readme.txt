@@ -51,7 +51,7 @@ NetHack JP README
 
      ./nethack -wX11 -bg black -fg white -bd white
 
-   【重要】X11 GUI 使用時に日本語が白四角（豆腐文字）で表示される場合は、Linux / WSL 環境に日本語 CJK フォントをインストールしてください：
+   【重要】X11 GUI 使用時に日本語や墓石の死因が白四角（豆腐文字）で表示される場合は、Linux / WSL 環境に日本語 CJK フォント（Noto Sans CJK JP 等）をインストールしてください：
 
      sudo apt update && sudo apt install -y fonts-noto-cjk fonts-ipafont-gothic
      fc-cache -fv

@@ -38,7 +38,7 @@ if [ $HAS_CURSES -eq 0 ]; then
     echo "--------------------------------------------------------"
     echo "[!] Error: ncurses development library/headers (libncursesw5-dev) not found."
     echo "    To fix this issue, please run the following command in WSL:"
-    echo "    sudo apt update && sudo apt install -y build-essential libncursesw5-dev liblua5.4-dev pkg-config libx11-dev libxft-dev libxpm-dev libxaw7-dev libxt-dev"
+    echo "    sudo apt update && sudo apt install -y build-essential libncursesw5-dev liblua5.4-dev pkg-config libx11-dev libxft-dev libxpm-dev libxaw7-dev libxt-dev fonts-noto-cjk"
     echo "--------------------------------------------------------"
     exit 1
 fi

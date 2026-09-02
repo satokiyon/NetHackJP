@@ -59,6 +59,7 @@ sudo apt install build-essential libncursesw5-dev liblua5.4-dev pkg-config gdb l
 | `pkg-config` | ライブラリのコンパイルフラグ解決 |
 | `gdb` | パニックトレース (`PANICTRACE_GDB`) によるクラッシュ解析。実行時に必要 |
 | `libx11-dev` / `libxft-dev` / `libxaw7-dev` 等 | X11 GUI ポート (UTF-8 Xft / Athena Widgets) のビルド・描画ライブラリ |
+| `fonts-noto-cjk` (`Noto Sans CJK JP`) | X11 GUI ポートで日本語・墓石死因の文字化けを防ぐ日本語 CJK フォントパッケージ |
 
 > [!NOTE]
 > `gdb` は **実行時**にも参照されます。`sysconf` の `PANICTRACE_GDB=1` が有効な状態で `gdb` が存在しない場合、クラッシュ時に追加のバックトレース情報が取れないだけでなく、起動に失敗するケースもあります。インストールしておくことを強く推奨します。
