@@ -140,7 +140,7 @@ nethack
   ```text
   OPTIONS=windowtype:X11
   ```
-  *(またはコマンドライン引数 `playground/nethack -wX11` や `-windowtype X11` で起動。リポジトリ直下のサンプル設定ファイル `.nethackrc.X11` を `~/.nethackrc` としてコピーして利用可能です)*
+  *(またはコマンドライン引数 `playground/nethack -wX11 -bg black -fg white -bd white` やリリースパッケージに同封されている `./nethackW` スクリプトで起動。リポジトリ直下のサンプル設定ファイル `.nethackrc.X11` を `~/.nethackrc` としてコピーして利用可能です。なお X11版のタイルセットはファイル名が `x11tiles` 固定であり、タイルの画像サイズは自動判定されます)*
 - **tty インターフェース（デフォルト）**:
   ```text
   OPTIONS=windowtype:tty
@@ -520,7 +520,8 @@ GitHub上の Releases ページから新規リリースを作成し、ビルド�
 
 WSL (Linux) 環境上の NetHack X11 ポート (`windowtype:X11`) において、タイル画像が未探索マスや一部グラフィックで崩れる問題、および生成される `x11tiles` 画像が途中で読み込み中断を起こす問題についての技術注釈です。
 
-* **タイル解像度の自動算出 (`win/X11/winmap.c`)**:
+* **タイル解像度の自動算出とファイル名固定仕様 (`win/X11/winmap.c`)**:
+  - X11 ポートで読み込まれるタイルセットのファイル名は `x11tiles` 固定です。
   - 従来は 1 タイルのサイズを 16x16 固定と仮定していたが、読み込まれた `tile_image->width` から `tile_width = image_width / TILES_PER_ROW` を動的に算出し、32x32 タイルセット等の高解像度 XPM にも自動適応するように改善した。
 * **`tile2x11` における XPM 色記号文字コード破壊の修正 (`win/X11/tile2x11.c`)**:
   - 単純な `(char)(i + '0')` による文字コード加算では、色数増加時に `"` (ダブルクォーテーション) 等の制御文字が混入して libXpm で構文エラーを起こし、画像ロードが途中で打ち切られていた。安全な ASCII キャラクターマップ (`xpm_chars[]`) を導入してエスケープ破綻を保護した。

@@ -85,7 +85,7 @@ jobs:
             cp "Guidebook_JP.txt" "${DIST_DIR}/"
           fi
 
-          # Create portable launcher script
+          # Create portable launcher scripts (nethack for TTY/curses, nethackW for X11 GUI)
           cd "${DIST_DIR}"
           if [ -f "nethack" ]; then
             mv nethack nethack.bin
@@ -98,7 +98,15 @@ export HACKDIR="$SCRIPT_DIR"
 export NETHACKDIR="$SCRIPT_DIR"
 exec "$SCRIPT_DIR/nethack.bin" "$@"
 EOF
-          chmod +x nethack nethack.bin
+
+          cat << 'EOF' > nethackW
+#!/bin/sh
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+export HACKDIR="$SCRIPT_DIR"
+export NETHACKDIR="$SCRIPT_DIR"
+exec "$SCRIPT_DIR/nethack.bin" -wX11 -bg black -fg white -bd white "$@"
+EOF
+          chmod +x nethack nethackW nethack.bin
           cd ..
 
           zip -r "${ZIP_NAME}" "${DIST_DIR}"
