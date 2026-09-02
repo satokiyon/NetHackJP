@@ -40,7 +40,7 @@ NetHack.font_status:  sans-10
 NetHack.font_text:    mono-10
 
 ! No .nethackrc setting for this, but it gets the right size
-NetHack.font_rip:     sans-9
+NetHack.font_rip:     sans,Noto Sans CJK JP-9
 
 ! tile_file names a file containing full-color tiles for the map.
 ! If you use a 100dpi (or greater) monitor you may wish to double the

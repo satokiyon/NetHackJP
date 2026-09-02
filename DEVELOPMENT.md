@@ -418,7 +418,7 @@ Linux/UNIX 環境の X11 ウィンドウポート（`win/X11`）において、X
 * **対象ファイル**:
   1. **`sys/unix/hints/linux-jp`**: `WANT_WIN_X11=1` を有効化し、`tty`, `curses`, `X11` の 3 ポートマルチバイナリ生成に対応。
   2. **`win/X11/winlabel.c`**: `XftDrawString8` / `XftTextExtents8` を `XftDrawStringUtf8` / `XftTextExtentsUtf8` に更新。
-  3. **`win/X11/wintext.c`**: 墓石（RIP）画面等での描画・テキスト幅算出を `XftTextExtentsUtf8` / `XftDrawStringUtf8` に更新。
+  3. **`win/X11/wintext.c`**: 墓石（RIP）画面等での描画・テキスト幅算出を `XftTextExtentsUtf8` / `XftDrawStringUtf8` に更新。また、`appResources.font_rip`（`sans-9`）単体指定時に日本語死因が文字化け（白四角化）しないよう、`font_text` や `Noto Sans CJK JP` をフォールバックフォントとして結合オープンする処理を追加。
   4. **`win/X11/winmesg.c`**: メッセージウィンドウの Xft 描画部を UTF-8 ワイド文字表示に更新。
   5. **`win/X11/winmap.c`**: マップ描画部の `XftDrawString8` を `XftDrawStringUtf8` に更新。
   6. **`win/X11/winstat.c`**: ステータス表示の `XftTextExtents8` / `XftDrawString8` を `XftTextExtentsUtf8` / `XftDrawStringUtf8` に更新。

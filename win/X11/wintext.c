@@ -503,8 +503,17 @@ rip_exposed(Widget w, XtPointer client_data UNUSED,
     Visual *visual = DefaultVisualOfScreen(screen);
     Colormap cmap = DefaultColormapOfScreen(screen);
     XftDraw *draw = XftDrawCreate(display, XtWindow(w), visual, cmap);
-    XftFont *font = XftFontOpenName(display, DefaultScreen(display),
-                                    appResources.font_rip);
+    /* NetHackJP: X11 UTF-8 tombstone RIP font rendering with CJK fallback */
+    char rip_font_name[512];
+    const char *text_font = iflags.wc_font_text ? iflags.wc_font_text : appResources.font_text;
+    if (text_font && *text_font) {
+        Snprintf(rip_font_name, sizeof(rip_font_name), "%.256s,%.256s",
+                 appResources.font_rip ? appResources.font_rip : "sans-9", text_font);
+    } else {
+        Snprintf(rip_font_name, sizeof(rip_font_name), "%.256s,Noto Sans CJK JP-9",
+                 appResources.font_rip ? appResources.font_rip : "sans-9");
+    }
+    XftFont *font = XftFontOpenName(display, DefaultScreen(display), rip_font_name);
     XftColor foreground;
     X11_new_color(w, values.foreground, &foreground);
     for (i = 0; i <= YEAR_LINE; i++) {
