@@ -417,11 +417,11 @@ Linux/UNIX 環境の X11 ウィンドウポート（`win/X11`）において、X
 
 * **マーカータグ**: `/* NetHackJP: X11 UTF-8 text rendering and input support */`
 * **対象ファイル**:
-  1. **`sys/unix/hints/linux-jp`**: `WANT_WIN_X11=1` を有効化し、`tty`, `curses`, `X11` の 3 ポートマルチバイナリ生成に対応。
+  1. **`sys/unix/hints/linux-jp` & `sys/unix/build_wsl.sh` & `sys/unix/Makefile.dat`**: `WANT_WIN_X11=1` を有効化し、`tty`, `curses`, `X11` の 3 ポートマルチバイナリ生成に対応。また、`Makefile.dat` における `tile2x11` のテキストファイル引数順序を `tile.c` のレイアウト（`monsters`, `objects`, `-grayscale monsters`, `other`）と完全一致させるよう修正し、NetHack 5.0 純正タイルセット `x11tiles` の自動生成・配置に対応。
   2. **`win/X11/winlabel.c`**: `XftDrawString8` / `XftTextExtents8` を `XftDrawStringUtf8` / `XftTextExtentsUtf8` に更新。
   3. **`win/X11/wintext.c`**: 墓石（RIP）画面等での描画・テキスト幅算出を `XftTextExtentsUtf8` / `XftDrawStringUtf8` に更新。また、`appResources.font_rip`（`sans-9`）単体指定時に日本語死因が文字化け（白四角化）しないよう、`font_text` や `Noto Sans CJK JP` をフォールバックフォントとして結合オープンする処理を追加。
   4. **`win/X11/winmesg.c`**: メッセージウィンドウの Xft 描画部を UTF-8 ワイド文字表示に更新。
-  5. **`win/X11/winmap.c`**: マップ描画部の `XftDrawString8` を `XftDrawStringUtf8` に更新。
+  5. **`win/X11/winmap.c`**: マップ描画部の `XftDrawString8` を `XftDrawStringUtf8` に更新。また、`XpmReadFileToImage` 呼び出し前に Windows CRLF 改行に起因する `\r` (0x0D) 文字のトリム処理および `fopen_datafile` で `HACKDIR`（`playground/` 等）配下の `tile_file` パスを正常解決する処理を追加。
   6. **`win/X11/winstat.c`**: ステータス表示の `XftTextExtents8` / `XftDrawString8` を `XftTextExtentsUtf8` / `XftDrawStringUtf8` に更新。
   7. **`win/X11/winX.c`**: `X11_init_nhwindows` で `XtSetLanguageProc(NULL, NULL, NULL)` を呼び出し、XIM ロケール接続を初期化。
   8. **`win/X11/dialogs.c`**: ダイアログの `AsciiText` Widget で `XtNinternational` (`international: True`) を有効化し、日本語テキスト受領に対応。
@@ -513,3 +513,18 @@ git push origin NetHackJP-5.0.0-20260629
 
 ### GitHub Release の作成
 GitHub上の Releases ページから新規リリースを作成し、ビルドされた Windows 用バイナリをアタッチして公開します。
+
+---
+
+## 8. X11 GUI ポートにおける XPM タイル描画および生成ツールの修復（2026年9月完了）
+
+WSL (Linux) 環境上の NetHack X11 ポート (`windowtype:X11`) において、タイル画像が未探索マスや一部グラフィックで崩れる問題、および生成される `x11tiles` 画像が途中で読み込み中断を起こす問題についての技術注釈です。
+
+* **タイル解像度の自動算出 (`win/X11/winmap.c`)**:
+  - 従来は 1 タイルのサイズを 16x16 固定と仮定していたが、読み込まれた `tile_image->width` から `tile_width = image_width / TILES_PER_ROW` を動的に算出し、32x32 タイルセット等の高解像度 XPM にも自動適応するように改善した。
+* **`tile2x11` における XPM 色記号文字コード破壊の修正 (`win/X11/tile2x11.c`)**:
+  - 単純な `(char)(i + '0')` による文字コード加算では、色数増加時に `"` (ダブルクォーテーション) 等の制御文字が混入して libXpm で構文エラーを起こし、画像ロードが途中で打ち切られていた。安全な ASCII キャラクターマップ (`xpm_chars[]`) を導入してエスケープ破綻を保護した。
+* **`convert_tiles` ポインタ移動計算の「絶対座標計算方式」への変更 (`win/X11/tile2x11.c`)**:
+  - 相対ポインタ加算のバグにより1行（40個）終わるごとに画像が対角線状に横滑りしていた計算式を、`total`（タイル番号）からの絶対座標計算 (`tb = tile_bytes + (total / header.per_row)...`) へ修正し、ポインタズレを物理的に排除した。
+* **`objects.txt` 1行目のコメント記号補正 (`win/share/objects.txt`)**:
+  - `win/share/tiletext.c` のパーサーが `#` で始まらないヘッダー行 `NOTICE:` をカラー定義行と誤認して `objects.txt` のパースに失敗 (`0 tiles`) していた問題を、行頭を `# NOTICE:` にコメントアウトすることで修復した。

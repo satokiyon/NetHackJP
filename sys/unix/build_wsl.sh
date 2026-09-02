@@ -49,14 +49,14 @@ sh sys/unix/setup.sh "$HINTS"
 echo "Makefiles generated successfully."
 echo "Cleaning old build artifacts..."
 make clean
-rm -f src/hacklib.a src/*.o util/*.o
+rm -f src/hacklib.a src/*.o util/*.o util/tile2x11 dat/x11tiles playground/x11tiles
 
 echo "Building prerequisites (lua_support)..."
 make lua_support
 
 echo "Starting main build with sequential make (tty, curses & X11 interfaces)..."
 
-make WANT_WIN_CURSES=1 WANT_WIN_TTY=1 WANT_WIN_X11=1 WANT_DEFAULT=tty all
+make WANT_WIN_CURSES=1 WANT_WIN_TTY=1 WANT_WIN_X11=1 WANT_DEFAULT=tty all x11tiles
 
 echo "=========================================="
 echo "Build complete! Executable is located at src/nethack."
