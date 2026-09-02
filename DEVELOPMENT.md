@@ -140,7 +140,7 @@ nethack
   ```text
   OPTIONS=windowtype:X11
   ```
-  *(またはコマンドライン引数 `playground/nethack -wX11 -bg black -fg white -bd white` やリリースパッケージに同封されている `./nethackW` スクリプトで起動。リポジトリ直下のサンプル設定ファイル `.nethackrc.X11` を `~/.nethackrc` としてコピーして利用可能です。なお X11版のタイルセットはファイル名が `x11tiles` 固定であり、タイルの画像サイズは自動判定されます)*
+  *(または `NetHack.ad` リソースを指定して `XAPPLRESDIR=./playground ./playground/nethack -wX11` や、リリースパッケージに同封されている `./nethackW` スクリプトで起動。リポジトリ直下のサンプル設定ファイル `.nethackrc.X11` を `~/.nethackrc` としてコピーして利用可能です。なお X11版のタイルセットはファイル名が `x11tiles` 固定であり、タイルの画像サイズは自動判定されます)*
 - **tty インターフェース（デフォルト）**:
   ```text
   OPTIONS=windowtype:tty
@@ -167,7 +167,11 @@ sh sys/unix/build_wsl.sh
 make install
 
 # (5) 起動
+# CUI (tty / curses) で起動する場合
 playground/nethack
+
+# GUI (X11) で起動する場合
+XAPPLRESDIR=./playground ./playground/nethack -wX11
 ```
 
 > [!TIP]
