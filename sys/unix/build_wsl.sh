@@ -1,4 +1,4 @@
-# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02.
+# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03.
 #!/bin/sh
 # NetHackJP build script for WSL (Linux)
 # Usage: ./sys/unix/build_wsl.sh [hints_file]
@@ -51,6 +51,14 @@ echo "Cleaning old build artifacts..."
 make clean
 rm -f src/hacklib.a src/*.o util/*.o util/tile2x11 dat/x11tiles playground/x11tiles
 
+# NetHackJP: Report XIM (X Input Method) compile-time status so the
+# user can verify that HAVE_XIM was picked up by the generated Makefile.
+if grep -q -- "-DHAVE_XIM" src/Makefile 2>/dev/null; then
+    echo "XIM support: ENABLED (-DHAVE_XIM detected in src/Makefile)"
+else
+    echo "XIM support: DISABLED (HAVE_XIM not set; check linux-jp hints)"
+fi
+
 echo "Building prerequisites (lua_support)..."
 make lua_support
 
@@ -64,4 +72,14 @@ echo "All 'tty', 'curses' and 'X11' window ports are included."
 echo ""
 echo "Next step: Run 'make install' to install into playground/."
 echo "Then execute: ./playground/nethack (or ./playground/nethack -wX11 for X11 GUI)"
+echo ""
+echo "------ XIM verification (X11 GUI only) ------"
+echo "Run './playground/nethack -wX11' and check stderr for one of:"
+echo "  XIM: connected to input method (XPreeditNothing / XStatusNothing)"
+echo "      -> fcitx5 / ibus connected; Japanese input will work after Phase 2+"
+echo "  XIM: no input method registered (XMODIFIERS unset or @im=none)"
+echo "      -> check 'export XMODIFIERS=@im=fcitx5' (or @im=ibus)"
+echo "  XIM: XOpenIM failed; falling back to XLookupString (ASCII only)"
+echo "      -> IM server is set in XMODIFIERS but not actually running"
+echo "      -> e.g. 'fcitx5 -d' or 'ibus-daemon -drx'"
 echo "=========================================="

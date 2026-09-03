@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03. */
 /* NetHack 5.0	winX.c	$NHDT-Date: 1781973110 2026/06/20 16:31:50 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.150 $ */
 /* Copyright (c) Dean Luick, 1992                                 */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -1695,6 +1695,13 @@ X11_init_nhwindows(int *argcp, char **argv)
                                argcp, (String *) argv,      /* command line */
                                default_resource_data, /* fallback resources */
                                (ArgList) args, num_args);
+    /* NetHackJP: XIM integration - open the input method after Xt has
+     * given us a Display.  When fcitx5 / ibus is not running, xim_init()
+     * leaves xim_active = FALSE and the rest of the port falls back to
+     * plain XLookupString (ASCII-only). */
+#ifdef HAVE_XIM
+    xim_init(XtDisplay(toplevel));
+#endif
     XtOverrideTranslations(toplevel,
               XtParseTranslationTable("<Message>WM_PROTOCOLS: X11_hangup()"));
     XtAppAddTimeOut(app_context, blink_interval, blink_callback, NULL);
@@ -1799,6 +1806,12 @@ X11_exit_nhwindows(const char *dummy)
 
     release_getline_widgets();
     release_yn_widgets();
+
+    /* NetHackJP: XIM integration - close the input method before
+     * tearing the Display down.  No-op when HAVE_XIM is not defined. */
+#ifdef HAVE_XIM
+    xim_cleanup();
+#endif
 
     x_inited = FALSE;
 }
@@ -1933,7 +1946,10 @@ askname_done(Widget w, XtPointer client_data, XtPointer call_data)
     nhUse(w);
     nhUse(call_data);
 
-    s = (char *) GetDialogResponse(dialog);
+    /* NetHackJP: read from the XIM-aware buffer (wingetlin.c).  The
+     * dialog still passes its own form widget as client_data, so the
+     * old "askname_done" signature is preserved. */
+    s = (char *) XimDialogGetResponse(dialog);
 
     len = strlen(s);
     if (len == 0) {
@@ -1983,23 +1999,30 @@ X11_askname(void)
         return;
     } /* else iflags.wc_player_selection == VIA_PROMPTS */
 
-    XtSetArg(args[0], XtNallowShellResize, True);
+XtSetArg(args[0], XtNallowShellResize, True);
 
     popup = XtCreatePopupShell("askname", transientShellWidgetClass, toplevel,
                                args, ONE);
     XtOverrideTranslations(popup,
           XtParseTranslationTable("<Message>WM_PROTOCOLS: askname_delete()"));
 
-    dialog = CreateDialog(popup, nhStr("dialog"), askname_done,
-                          (XtCallbackProc) 0);
+    /* NetHackJP: use the XIM-aware dialog (wingetlin.c) instead of
+     * the Xaw AsciiText version (dialogs.c).  Xaw's XtNinternational
+     * does not engage on this widget under WSL/XWayland fcitx5. */
+    dialog = CreateXimDialog(popup, nhStr("dialog"), askname_done,
+                             (XtCallbackProc) 0);
 
-    SetDialogPrompt(dialog, nhStr("What is your name?")); /* set prompt */
-    SetDialogResponse(dialog, svp.plname, PL_NSIZ); /* set default answer */
+    XimDialogSetPrompt(dialog, nhStr("What is your name?")); /* set prompt */
+    XimDialogSetResponse(dialog, svp.plname); /* set default answer */
 
     XtRealizeWidget(popup);
     positionpopup(popup, TRUE); /* center,bottom */
 
     nh_XtPopup(popup, (int) XtGrabExclusive, dialog);
+    /* NetHackJP: explicitly move the X server focus to the OK button
+     * so our key event handler fires.  XtSetKeyboardFocus alone is
+     * not enough on WSLg/XWayland. */
+    XimDialogFocusInput(dialog);
 
     /* The callback will enable the event loop exit. */
     (void) x_event(EXIT_ON_EXIT);
@@ -2033,7 +2056,8 @@ done_button(Widget w, XtPointer client_data, XtPointer call_data)
     nhUse(w);
     nhUse(call_data);
 
-    s = (char *) GetDialogResponse(dialog);
+    /* NetHackJP: read from the XIM-aware buffer (wingetlin.c). */
+    s = (char *) XimDialogGetResponse(dialog);
     len = strlen(s);
 
     /* Truncate input if necessary */
@@ -2108,8 +2132,8 @@ X11_getlin(
                                XtParseTranslationTable(
                                   "<Message>WM_PROTOCOLS: getline_delete()"));
 
-        getline_dialog = CreateDialog(getline_popup, nhStr("dialog"),
-                                      done_button, abort_button);
+        getline_dialog = CreateXimDialog(getline_popup, nhStr("dialog"),
+                                         done_button, abort_button);
 
         XtRealizeWidget(getline_popup);
         XSetWMProtocols(XtDisplay(getline_popup), XtWindow(getline_popup),
@@ -2127,15 +2151,19 @@ X11_getlin(
         upromptlen = 64;
 #ifdef EDIT_GETLIN
     /* set default answer */
-    SetDialogResponse(getline_dialog, input, upromptlen);
+    XimDialogSetResponse(getline_dialog, input);
 #else
     /* no default answer */
-    SetDialogResponse(getline_dialog, nhStr(""), upromptlen);
+    XimDialogSetResponse(getline_dialog, nhStr(""));
 #endif
-    SetDialogPrompt(getline_dialog, (String) question); /* set prompt */
+    XimDialogSetPrompt(getline_dialog, (String) question); /* set prompt */
     positionpopup(getline_popup, TRUE);           /* center,bottom */
 
     nh_XtPopup(getline_popup, (int) XtGrabExclusive, getline_dialog);
+    /* NetHackJP: force X server focus onto the OK button so our key
+     * event handler (on OK) actually receives keys.  XtSetKeyboardFocus
+     * is not enough on WSLg/XWayland. */
+    XimDialogFocusInput(getline_dialog);
 
     /* The callback will enable the event loop exit. */
     (void) x_event(EXIT_ON_EXIT);
@@ -2226,25 +2254,64 @@ static const char yn_translations[] = "#override\n\
      <Key>: yn_key()";
 
 /*
- * Convert the given key event into a character.  If the key maps to
- * more than one character only the first is returned.  If there is
- * no conversion (i.e. just the CTRL key hit) a NUL is returned.
+ * Convert the given key event into a UTF-8 string.  The full multi-byte
+ * sequence returned by XLookupString is written to `out` (up to
+ * out_size-1 bytes), NUL-terminated.  The Mod1 (Alt) meta bit is OR'd
+ * into the first byte to preserve the existing meta-letter convention.
+ *
+ * Returns the number of bytes written (excluding the NUL).  Returns
+ * zero if the key is a modifier-only key (no character).  Returns
+ * a negative value on error.
+ *
+ * Use this for callers that need to handle multi-byte input (Japanese
+ * etc.); the original key_event_to_char() below is a thin wrapper
+ * around this for callers that only care about the first byte.
  */
-char
-key_event_to_char(XKeyEvent *key)
+int
+key_event_to_utf8(XKeyEvent *key, char *out, int out_size)
 {
     char keystring[MAX_KEY_STRING];
     int nbytes;
+    int copy;
     boolean meta = !!(key->state & Mod1Mask);
 
-    nbytes = XLookupString(key, keystring, MAX_KEY_STRING, (KeySym *) 0,
+    if (out == (char *) 0 || out_size <= 0)
+        return -1;
+
+    nbytes = XLookupString(key, keystring, MAX_KEY_STRING - 1, (KeySym *) 0,
                            (XComposeStatus *) 0);
 
     /* Modifier keys return a zero length string when pressed. */
     if (nbytes == 0)
-        return '\0';
+        return 0;
+    if (nbytes < 0)
+        return -1;
+    if (nbytes > MAX_KEY_STRING - 1)
+        nbytes = MAX_KEY_STRING - 1;
 
-    return (char) (((int) keystring[0]) + (meta ? 0x80 : 0));
+    copy = (nbytes < out_size - 1) ? nbytes : out_size - 1;
+    (void) memcpy(out, keystring, (size_t) copy);
+    if (meta)
+        out[0] |= (char) 0x80;
+    out[copy] = '\0';
+    return copy;
+}
+
+/*
+ * Convert the given key event into a character.  If the key maps to
+ * more than one character only the first is returned.  If there is
+ * no conversion (i.e. just the CTRL key hit) a NUL is returned.
+ * This is a thin wrapper around key_event_to_utf8() for callers
+ * that only consume the first byte (e.g. yn prompts, role selection).
+ */
+char
+key_event_to_char(XKeyEvent *key)
+{
+    char buf[MAX_KEY_STRING];
+
+    if (key_event_to_utf8(key, buf, (int) sizeof buf) <= 0)
+        return '\0';
+    return buf[0];
 }
 
 /*
@@ -2894,11 +2961,23 @@ nh_XtPopup(Widget w,        /* widget */
     XSetWMProtocols(XtDisplay(w), XtWindow(w), &wm_delete_window, 1);
     if (appResources.autofocus)
         XtSetKeyboardFocus(toplevel, childwid);
+    /* NetHackJP: Phase 5 - XIM IC focus is set by the dialog's
+     * MapNotify handler (which has access to the just-created IC
+     * via xim_set_focus()).  nh_XtPopup itself does not touch the
+     * IC because the dialog's IC may not be created yet (create
+     * is lazy on first key event). */
 }
 
 void
 nh_XtPopdown(Widget w)
 {
+    /* NetHackJP: Phase 5 - when a popup goes away, clear XIM focus
+     * so fcitx5 stops routing keystrokes to the now-unmapped window's
+     * IC.  Without this, a later keystroke meant for the toplevel
+     * map window could still be sent to the dead popup's IC until
+     * the next focus event arrives. */
+    xim_focus_out(NULL);
+
     XtPopdown(w);
     if (appResources.autofocus)
         XtSetKeyboardFocus(toplevel, None);
@@ -2909,6 +2988,11 @@ win_X11_init(int dir)
 {
     if (dir != WININIT)
         return;
+
+    /* NetHackJP: Phase 7 - the default for iflags.wc_use_xim is set
+     * in src/options.c::initoptions_init() so it runs before .nethackrc
+     * is parsed.  We don't override it here, otherwise an explicit
+     * `OPTIONS=use_xim:off` in the user's config file would be lost. */
 
     return;
 }

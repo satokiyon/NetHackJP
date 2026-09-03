@@ -416,8 +416,11 @@ Linux/UNIX 環境の TTY モード（`wintty.c`）において、`DEF_PAGER`（�
 * **アップストリーム追従手順**:
   - アップストリームで外部ページャーの `open()` 処理や `display_file` の仕様が変更された場合、本マーカータグのブロックを確認し、`_jp` 付きファイル検索と `dlb_fopen` フォールバックのロジックを保持した状態で競合解決を行ってください。
 
-### 8. Linux/WSL X11 GUI ポートにおける UTF-8 日本語描画・入力対応
-Linux/UNIX 環境の X11 ウィンドウポート（`win/X11`）において、Xft (FreeType/Fontconfig) および Athena Widgets (`AsciiText`) を拡張し、日本語 UTF-8 テキストの正常な描画と XIM ロケール入力（`XtSetLanguageProc`）を有効化しました。
+### 8. Linux/WSL X11 GUI ポートにおける UTF-8 日本語描画対応
+Linux/UNIX 環境の X11 ウィンドウポート（`win/X11`）において、Xft (FreeType/Fontconfig) 描画を UTF-8 化し、日本語 TrueType/OpenType フォントを正しくレンダリングできるようにしました。
+
+> [!IMPORTANT]
+> §4.8 は **描画のみ** を扱います。**XIM（インプットメソッド）による日本語入力は §4.10 で扱います**。`XtSetLanguageProc(NULL, NULL, NULL)` は `LC_CTYPE` / `LC_MESSAGES` のロケールを初期化するのみで、fcitx5 / ibus 等の IM サーバとの通信経路は提供しません。XIM による実際の日本語入力は §4.10 を参照してください。
 
 * **マーカータグ**: `/* NetHackJP: X11 UTF-8 text rendering and input support */`
 * **対象ファイル**:
@@ -427,14 +430,11 @@ Linux/UNIX 環境の X11 ウィンドウポート（`win/X11`）において、X
   4. **`win/X11/winmesg.c`**: メッセージウィンドウの Xft 描画部を UTF-8 ワイド文字表示に更新。
   5. **`win/X11/winmap.c`**: マップ描画部の `XftDrawString8` を `XftDrawStringUtf8` に更新。また、`XpmReadFileToImage` 呼び出し前に Windows CRLF 改行に起因する `\r` (0x0D) 文字のトリム処理および `fopen_datafile` で `HACKDIR`（`playground/` 等）配下の `tile_file` パスを正常解決する処理を追加。
   6. **`win/X11/winstat.c`**: ステータス表示の `XftTextExtents8` / `XftDrawString8` を `XftTextExtentsUtf8` / `XftDrawStringUtf8` に更新。
-  7. **`win/X11/winX.c`**: `X11_init_nhwindows` で `XtSetLanguageProc(NULL, NULL, NULL)` を呼び出し、XIM ロケール接続を初期化。
-  8. **`win/X11/dialogs.c`**: ダイアログの `AsciiText` Widget で `XtNinternational` (`international: True`) を有効化し、日本語テキスト受領に対応。
-  9. **`win/X11/NetHack.ad`**: Xft デフォルトフォント注釈に CJK 日本語フォント（`Noto Sans CJK JP` 等）のフォールバックガイドを追加。
+  7. **`win/X11/NetHack.ad`**: Xft デフォルトフォント注釈に CJK 日本語フォント（`Noto Sans CJK JP` 等）のフォールバックガイドを追加。
+* **`XtSetLanguageProc(NULL, NULL, NULL)`** は `X11_init_nhwindows` の先頭で呼んでロケールを初期化（`LC_CTYPE=ja_JP.UTF-8` 等）。**これは XIM 接続ではない**。
+* **ダイアログ入力の XIM 化は当初 `AsciiText` Widget の `XtNinternational=True` で試行したが、WSLg/XWayland 環境で fcitx5 が engage しなかった**。`win/X11/dialogs.c` 側の `XtNinternational` 指定は無効で、§4.10 の `wingetlin.c` 自前ダイアログに置き換えた。
 * **アップストリーム追従手順**:
   - アップストリームで X11 ポートの Xft UTF-8 化や Pango/Cairo への置き換えが入った場合は、本変更箇所を取り消してアップストリームに追従してください。
-
-> [!NOTE]
-> 上記 §4.8 で言及している `XtSetLanguageProc` は `LC_CTYPE` / `LC_MESSAGES` のロケールを初期化するのみで、fcitx5 / ibus 等のインプットメソッド（IM）サーバとの通信経路（XIM: XOpenIM / XCreateIC / Xutf8LookupString）は提供しません。XIM による日本語入力の実装は §4.10（実装中、詳細は `XIM-IMPLEMENTATION-PLAN.md` を参照）で行います。
 
 
 ### 9. X11 ポートにおける未初期化 XFontStruct ポインタ参照保護
@@ -455,9 +455,41 @@ WSL や Linux 環境において、NetHack 起動時に Linux のログインユ
   3. **`playground/sysconf`**: `GENERICUSERS` のデフォルト値を `*` に変更。
 * **動作仕様**:
   - `GENERICUSERS=*` が指定されている場合、`src/role.c` の `plnamesuffix()` にて `svp.plname` がクリアされ、ゲーム開始時に必ず `askname()`（名前入力プロンプト）が実行されます。
-  - コマンドライン引数 `-u <名前>` や `OPTIONS=name:<名前>` が指定されている場合はそちらが優先されます。
+  - コマンドライン引数 `-u <名前>` や `OPTIONS=name:<名前>` が指定された場合はそちらが優先されます。
 * **アップストリーム追従手順**:
   - アップストリームで `sysconf` のマージ競合が生じた場合は、`GENERICUSERS=*` の設定を維持してください。
+
+### 11. Linux/WSL X11 GUI ポートにおける XIM インプットメソッド対応
+本リポジトリの X11 ポートは上流 NetHack 5.0 には XIM（X Input Method）対応が含まれていません。fcitx5 / ibus / IIIMF 等の IM サーバと通信して日本語入力を行うための独自拡張です。詳細はルートの `XIM-IMPLEMENTATION-PLAN.md` を参照。
+
+* **マーカータグ**: `/* NetHackJP: XIM integration */` および各ファイル内の補助タグ
+* **ビルドフラグ**: `HAVE_XIM`（`sys/unix/hints/linux-jp` で `CFLAGS += -DHAVE_XIM`）
+* **対応ファイル**:
+  1. **`win/X11/winxim.c` (新規)**: XIM インフラ層。`XOpenIM` / `XSetLocaleModifiers` / `XCreateIC` / `XSetICFocus` / `XUnsetICFocus` / `Xutf8LookupString` のラッパーを提供。Widget ごとの IC キャッシュ、現在の focused IC の追跡、`xim_focus_in`/`xim_focus_out` ヘルパー。**`#ifdef HAVE_XIM` ガード** で、XIM 非対応環境では空マクロに展開されバイナリ影響なし。
+  2. **`include/winX.h`**: `xim_init` / `xim_cleanup` / `xim_create_ic` / `xim_destroy_ic` / `xim_focus_in` / `xim_focus_out` / `xim_lookup_utf8` / `xim_is_active` の extern 宣言、および `key_event_to_utf8`（Phase 4 で追加）。
+  3. **`sys/unix/Makefile.src`**: `win/X11/winxim.c` と `win/X11/wingetlin.c` を `WINX11SRC` / `WINX11OBJ` に追加し、対応する `$(TARGETPFX)winxim.o` / `$(TARGETPFX)wingetlin.o` ビルドルールを追加。
+  4. **`sys/unix/hints/linux-jp`**: `HAVE_XIM=1` 設定と `CFLAGS += -DHAVE_XIM` を追加。`winxim.o` を `WINX11OBJ` に追加。
+  5. **`win/X11/winX.c`**: `X11_init_nhwindows` で `xim_init(XtDisplay(toplevel))`、`X11_exit_nhwindows` で `xim_cleanup()` を呼ぶ。`nh_XtPopdown` で `xim_focus_out(NULL)` を呼んで popup 終了時に IM focus を解放。`key_event_to_utf8` を新設（Phase 4）。
+  6. **`win/X11/winmap.c`**: `map_input` の KeyPress 処理で `Xutf8LookupString` を使い UTF-8 バイト列を取得。Meta ビットは先頭バイトにのみ付与（UTF-8 連続バイトを破壊しない）。map IC を lazy 作成し、`xim_focus_in` で focus を移す（Phase 2 + Phase 5）。
+  7. **`win/X11/wingetlin.c` (新規)**: `XtNinternational=True` を使った Xaw AsciiText は WSLg/XWayland + fcitx5 で engage しなかったため、`asciiTextWidgetClass` を自前の `labelWidgetClass` ベースに置換。`CreateXimDialog` / `XimDialogSetPrompt` / `XimDialogSetResponse` / `XimDialogGetResponse` / `XimDialogFocusInput` の API を提供。`MapNotify` ハンドラで `XSetInputFocus` を呼んで focus を確定し、`XIM IC` を `xim_create_ic` で生成 + `xim_focus_in`。
+  8. **`win/X11/winmisc.c`**: `ec_key`（`#versuswizard` 等の extended command）をマルチバイト UTF-8 対応に。`key_event_to_utf8` で全バイトを `ec_chars[]` に append して `strncmp` で `command_list[]` と比較。
+  9. **`include/winX.h`**: Phase 4 で `key_event_to_utf8` の extern 宣言追加。
+* **既知の制限**:
+  - yn prompts / role / race / gender / alignment 選択は単一文字入力のため、ASCII のみ対応（`や` を打鍵しても先頭バイト 0xE3 が `y`/`n` にマッチしないため無視）。これは仕様。将来の拡張で YN プロンプトも XIM 経由にできるが、yn の本質的意味（y/n/?/q の即応）からは離れる。
+  - `nh_XtPopdown` で `xim_focus_out` を呼ぶが、map IC は次回 `map_input` の最初の KeyPress 時に lazy に focus される。即応性が必要なら明示的 refocus を追加。
+  - XtNinternational (Athena Widgets 内部 XIM) は WSLg/XWayland + fcitx5 構成で機能しなかったため、`wingetlin.c` の自前実装に全面置換した。
+* **実行時トグル (Phase 7)**:
+  - `OPTIONS=use_xim:on`（デフォルト）／ `OPTIONS=use_xim:off` で XIM の有効・無効を切り替え可能。
+  - 仕組み: `include/optlist.h` に `use_xim` オプション追加（`WC2_USE_XIM` ビット）、`src/options.c::optfn_use_xim` が `iflags.wc_use_xim` を 0/1 に設定。`initoptions_init()` で `iflags.wc_use_xim = 1` のデフォルトを設定（`.nethackrc` パース前）。
+  - 関連ファイル:
+    - `include/winprocs.h`: `WC2_USE_XIM` ビット定義
+    - `include/flag.h`: `wc_use_xim` フィールド追加
+    - `include/optlist.h`: `use_xim` エントリ追加
+    - `src/options.c`: `optfn_use_xim` ハンドラ + `wc2_options[]` 登録 + `initoptions_init` でデフォルト値
+    - `win/X11/winxim.c`: `xim_init` で `iflags.wc_use_xim == 0` の場合は `XOpenIM` をスキップ
+* **アップストリーム追従手順**:
+  - アップストリーム NetHack 5.0 に XIM 対応がマージされた場合は、本セクションの全独自拡張を取り消してアップストリーム版に追従する。
+  - 追従時は `winxim.c` / `wingetlin.c` を削除し、`Makefile.src` から関連エントリを削除し、`linux-jp` から `HAVE_XIM=1` を削除し、`flag.h` / `optlist.h` / `options.c` / `winprocs.h` の XIM 関連エントリを取り消す。
 
 ---
 

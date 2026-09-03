@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03. -->
 <!-- agent-ninja-START -->
 ## Agent Skills
 
@@ -211,6 +211,53 @@ GitHub Actions等で実行される CodeQL のコードスキャン警告（Code
    - **`tgetch()` からの文字受領と二重エンコード防止**: POSIX/Linux 環境における `tgetch()` の戻り値 `c >= 0x80` は、Unicode コードポイントではなく端末からの UTF-8 生バイト列の 1 バイトです。`WIN32CON` (Windowsコンソール) 以外では `unicodeval_to_utf8str(c)` に通さず、生バイトのまま入力バッファに受領して二重エンコード（`0xE3` ➔ `0xC3 0xA3` 'ã' 等の文字化け）を防止してください。
    - **打鍵時リアルタイムエコーの UTF-8 シーケンス組み立て**: 入力中の 1 バイト受領ごとに即座に画面出力関数 (`putsyms`) へ渡すと、不完全な UTF-8 バイト列が端末に出力されエコー欄に  (U+FFFD) が発生します。先頭リードバイトを特定し、その文字の期待バイト数（ASCII 1バイト, 2バイト文字, 3バイト日本語, 4バイト絵文字）が完全にバッファに揃った時点で一括エコー出力してください。
    - **バックスペース消去幅のロケール非依存 Unicode 直接判定**: POSIX 環境の消去幅計算関数 (`getlin_utf8_char_display_width`) において `mbrtowc` / `wcwidth` 等の C ライブラリ関数を使用しないでください。プログラムの実行時ロケールが "C" 等の場合に UTF-8 変換エラーとなり全角文字でも 1 幅 (半角) にフォールバックして消去残りが生じます。必ず `getlin_utf8_to_codepoint` で取得した Unicode コードポイントに基づく East Asian Width 判定（ひらがな・カタカナ・漢字・全角英数記号・絵文字 `0x1F000`〜`0x1FFFF` 等）を用いて、常に正しく全角 2 セル幅を取得して消去してください。
+
+## X11 ポートにおける XIM (X Input Method) 実装方針
+
+> **Status: 全 Phase 完了**（Phase 0〜8 すべて実装・検証済。Phase 8 で WSL2 + fcitx5 環境での統合検証完了）。詳細はルートの `XIM-IMPLEMENTATION-PLAN.md` を参照。
+
+Linux/WSL 環境の X11 ウィンドウポート（`win/X11/`）で fcitx5 / ibus 等のインプットメソッド（IM）サーバと通信し、日本語入力を可能にするための実装ルールです。
+
+1. **ビルドフラグ `HAVE_XIM` の徹底**:
+   - XIM 関連コード（`XOpenIM` / `XCreateIC` / `Xutf8LookupString` 等）は必ず `#ifdef HAVE_XIM` で囲み、未定義時はビルドから完全に除外する。
+   - ビルドフラグは `sys/unix/hints/linux-jp` で `CFLAGS += -DHAVE_XIM` として定義。
+   - 上流 NetHack-5.0 に XIM 対応が入った場合は本独自拡張を取り消して追従する。
+
+2. **既存挙動の後方互換性維持**:
+   - `XOpenIM` が NULL を返した場合（fcitx5 未起動、`XMODIFIERS` 未設定等）は、警告ログのみを出して `XLookupString` にフォールバックする。
+   - 英語/ASCII のみの入力経路は完全に従来動作を維持すること。
+   - 既存呼び出し側（`key_event_to_char()` 戻り値 `char` を `digit()` / `strchr()` に渡すコード等）の意味論を破壊しない（Phase 4 で `key_event_to_char` は `key_event_to_utf8` のラッパーに変更し後方互換維持）。
+
+3. **マルチバイト UTF-8 取り扱い**:
+   - `Xutf8LookupString` から取得した UTF-8 バイト列は、可能なら `win/X11/winmap.c` の `inbuf[]` リングバッファにバイト単位でキューイングする。
+   - `key_event_to_char()` 経路は `int (XKeyEvent *, char *buf, int bufsz)` に拡張し、呼び出し側で「単一 ASCII」「マルチバイトキュー」の分岐を行う（Phase 4 で実装済）。
+   - 既存 API の戻り値 `char` を前提とした呼び出し側（`winmisc.c` の `role_key` / `race_key` / `gend_key` / `algn_key` / `ec_key`、`winmenu.c` の `menu_key`、`wintext.c` の `key_dismiss_text`、`winX.c` の `yn_key`）は順次更新。`ec_key` のみ UTF-8 全バイト処理に更新済、他は 1 バイト目のみ。
+
+4. **マーカータグと DEVELOPMENT.md 記録**:
+   - XIM 関連の独自実装には `/* NetHackJP: XIM ... */` 形式のマーカータグを付与。
+   - `DEVELOPMENT.md §4.11`（Linux/WSL X11 GUI ポートにおける XIM インプットメソッド対応）に本実装の全体像を記述。`XtSetLanguageProc` 単体では IM サーバと通信しないことも明記（§4.8 の `XtSetLanguageProc` 説明を訂正）。
+
+5. **PreeditNothing + StatusNothing の使用**:
+   - `XIMPreeditNothing | XIMStatusNothing` を `XCreateIC` で指定し、プリエディット／ステータスウィンドウは OS・fcitx5 に任せる。
+   - 自前で PreeditCallbacks / StatusCallbacks を実装しない（複雑性・クラッシュリスクを避ける）。
+
+6. **IC フォーカス管理（Phase 5）**:
+   - グローバルに `xim_current_focused_ic` を追跡。
+   - `xim_focus_in(ic)`: 旧 IC を `XUnsetICFocus` してから新 IC を `XSetICFocus`（一意的focus 維持）。
+   - `xim_focus_out()`: 現 IC を `XUnsetICFocus` してクリア。
+   - `nh_XtPopdown` で `xim_focus_out(NULL)` を呼んで popup 終了時に focus を解放。
+   - `map_input` 初回キー押下で `xim_focus_in(map_ic)` を呼んで map focus を再取得。
+
+7. **既知の制限（AGENTS.md に明記）**:
+   - コア `nhgetch()` は1byte=1コマンド前提のため、IME 確定文字列（複数バイト）が来た場合は各バイトが独立したコマンドとして解釈される（マップ画面）。
+   - yn prompts / role / race / gender / alignment 選択は単一文字入力のため、ASCII のみ対応（`や` を打鍵しても先頭バイト 0xE3 が `y`/`n` にマッチしないため無視）。これは仕様。
+   - `#名前` / `#記念碑` / `#虐殺` 等の getlin ダイアログは `wingetlin.c` の自前 Label + XIM 経路で全バイト受領・表示対応済（`#name` ダイアログ含む）。
+
+8. **実行時トグル `OPTIONS=use_xim` (Phase 7 実装済)**:
+   - `OPTIONS=use_xim:off` による XIM 無効化、`OPTIONS=use_xim:on`（デフォルト動作）で XIM 有効化。
+   - 既存 `OPTIONS=mouse_support` と同パターン（`src/options.c::optfn_use_xim` で `iflags.wc_use_xim` を 0/1 に設定）。
+   - デフォルト値（on）は `src/options.c::initoptions_init()` で `.nethackrc` パース前に設定されるため、ユーザの `OPTIONS=use_xim:off` は上書きされることなく正しく反映される。
+   - `win/X11/winxim.c::xim_init` で `iflags.wc_use_xim == 0` の場合は `XOpenIM` をスキップして完全に ASCII のみ動作（fcitx5 不在時と同じ経路）。
 
 ## タイル定義データファイルおよび X11 タイル画像の表示・生成方針
 

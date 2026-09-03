@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03. -->
 # NetHack 5.0 日本語化非公式プロジェクト
 
 NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.nethack.org/)5.0 を日本語で快適にプレイできるようにすることを目的とした非公式プロジェクトです。(対象OSはWindowsとUbuntu(WSL)のみ)
@@ -72,6 +72,34 @@ NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.net
 
 ※ GUIモード起動時に日本語や墓石の文字が白四角（豆腐文字）で表示される場合は、環境に日本語 CJK フォントパッケージを導入してください（例: `sudo apt update && sudo apt install -y fonts-noto-cjk`）。
 
+#### Linux X11 GUI 版で fcitx5 / ibus による日本語入力を有効にするには
+WSL / Linux で X11 版（`./nethackW`）を起動し、`#名前` `#記念碑` `#虐殺` 等で日本語を入力する場合、別途 XIM（インプットメソッド）サーバの設定が必要です。
+
+1. **fcitx5 環境**（Ubuntu / Debian 系の現行デフォルト）の場合:
+   ```bash
+   sudo apt install fcitx5 fcitx5-frontend-gtk3 fcitx5-modules
+   # ~/.bashrc に追加（ログインシェルでも確実に効くよう ~/.profile にも）
+   export GTK_IM_MODULE=fcitx
+   export QT_IM_MODULE=fcitx
+   export XMODIFIERS=@im=fcitx
+   export SDL_IM_MODULE=fcitx
+   fcitx5 -d
+   ```
+2. **ibus 環境**（従来の Ubuntu）:
+   ```bash
+   export GTK_IM_MODULE=ibus
+   export QT_IM_MODULE=ibus
+   export XMODIFIERS=@im=ibus
+   ibus-daemon -drx
+   ```
+3. X11 版を起動:
+   ```bash
+   XAPPLRESDIR=./playground ./playground/nethackW
+   ```
+   起動直後に stderr に `XIM: connected to input method` と出れば fcitx5/ibus との接続に成功。`XIM: XOpenIM failed` と出る場合は上記環境変数やデーモンの起動状態を確認してください。
+
+※ 起動時に `XIM: XOpenIM failed ... falling back to XLookupString (ASCII only)` と表示された場合でも、英語/ASCII の getlin は動作します。fcitx5 を起動後に**新しいターミナル**で起動してください（既存ターミナルでは `~/.bashrc` が読み込まれません）。
+
 
 - `.nethackrc` に設定できる各種オプションやゲーム内容に関する説明は、`Guidebook_JP.txt` を参照してください。
 
@@ -86,6 +114,12 @@ Windows版およびLinux(X11)版では、ゲーム内での日本語入力・表
 * 「虐殺（genocide）」の指定
 * データベースの検索
 * その他いろいろ
+
+**Linux X11 版での日本語入力の仕組み（Phase 1〜5 実装）**:
+- `win/X11/winxim.c` が `XOpenIM` / `XCreateIC` で fcitx5 / ibus に接続し、`win/X11/wingetlin.c` の自前ダイアログが `Xutf8LookupString` で UTF-8 を受け取る。
+- マップ画面の `h`/`j`/`k`/`l` 等は**1byte=1コマンド**のため、複数バイトの日本語確定は1バイトずつ別コマンド扱いとなります。これは NetHack コアの制限です。
+- yn prompts（y/n/? 等）や role/race/gender 選択は**単一文字入力**のため、ASCII のみ対応（`や` を打鍵しても先頭バイト 0xE3 が `y`/`n` にマッチしない）。
+- `#虐殺` `#記念碑` `#願い` `#name` 等の**自由入力ダイアログ**では日本語入力が完全に動作します。
 ---
 
 ### 3. タイルセット（画像）で遊ぶ

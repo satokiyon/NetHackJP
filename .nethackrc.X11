@@ -29,6 +29,12 @@ OPTIONS=font_message:Noto Sans CJK JP-10
 OPTIONS=font_status:Noto Sans CJK JP-10
 OPTIONS=font_text:Noto Sans CJK JP-10
 
+# *** XIM (Input Method) - fcitx5 / ibus ***
+# Phase 7 実装。`OPTIONS=use_xim:off` でXIMを無効化できる。
+# デフォルトはON。fcitx5 が起動していない / XMODIFIERS 未設定時は
+# ASCII フォールバック動作になる。
+# OPTIONS=use_xim:on
+
 
 OPTIONS=hilite_pet,toptenwin
 OPTIONS=splash_screen,player_selection:prompts
