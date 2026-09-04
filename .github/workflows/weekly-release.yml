@@ -1,9 +1,9 @@
-# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-02.
+# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-04.
 name: Weekly Release
 
 on:
   schedule:
-    - cron: '0 18 * * SAT' # AM 03:00 JST (UTC 18:00)
+    - cron: '0 18 * * FRI' # AM 03:00 JST (Fri 18:00 UTC)
   workflow_dispatch:
 
 jobs:
@@ -25,7 +25,8 @@ jobs:
       - name: Get current date
         id: date
         run: |
-          $date = Get-Date -Format "yyyyMMdd"
+          $jst = [TimeZoneInfo]::ConvertTimeBySystemTimeZoneId([DateTime]::UtcNow, 'Tokyo Standard Time')
+          $date = $jst.ToString("yyyyMMdd")
           echo "DATE_STR=$date" >> $env:GITHUB_ENV
         shell: powershell
 
@@ -63,7 +64,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential bison flex libncursesw5-dev libuuid-dev pkg-config
+          sudo apt install -y build-essential bison flex libncursesw5-dev libuuid-dev pkg-config \
+            libx11-dev libxaw7-dev libxt-dev libxpm-dev libxft-dev libfontconfig1-dev bdftopcf xfonts-utils zip
 
       - name: Build NetHackJP (Linux)
         run: |
@@ -73,7 +75,7 @@ jobs:
 
       - name: Prepare package
         run: |
-          DATE_STR=$(date +"%Y%m%d")
+          DATE_STR=$(TZ='Asia/Tokyo' date +"%Y%m%d")
           DIST_DIR="NetHackJP-5.0.0-${DATE_STR}-linux"
           ZIP_NAME="${DIST_DIR}.zip"
 
@@ -91,23 +93,24 @@ jobs:
             mv nethack nethack.bin
           fi
 
-          cat << 'EOF' > nethack
-#!/bin/sh
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-export HACKDIR="$SCRIPT_DIR"
-export NETHACKDIR="$SCRIPT_DIR"
-export XAPPLRESDIR="$SCRIPT_DIR"
-exec "$SCRIPT_DIR/nethack.bin" "$@"
-EOF
+          {
+            echo '#!/bin/sh'
+            echo 'SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"'
+            echo 'export HACKDIR="$SCRIPT_DIR"'
+            echo 'export NETHACKDIR="$SCRIPT_DIR"'
+            echo 'export XAPPLRESDIR="$SCRIPT_DIR"'
+            echo 'exec "$SCRIPT_DIR/nethack.bin" "$@"'
+          } > nethack
 
-          cat << 'EOF' > nethackW
-#!/bin/sh
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-export HACKDIR="$SCRIPT_DIR"
-export NETHACKDIR="$SCRIPT_DIR"
-export XAPPLRESDIR="$SCRIPT_DIR"
-exec "$SCRIPT_DIR/nethack.bin" -wX11 -bg black -fg white -bd white "$@"
-EOF
+          {
+            echo '#!/bin/sh'
+            echo 'SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"'
+            echo 'export HACKDIR="$SCRIPT_DIR"'
+            echo 'export NETHACKDIR="$SCRIPT_DIR"'
+            echo 'export XAPPLRESDIR="$SCRIPT_DIR"'
+            echo 'exec "$SCRIPT_DIR/nethack.bin" -wX11 -bg black -fg white -bd white "$@"'
+          } > nethackW
+
           chmod +x nethack nethackW nethack.bin
           cd ..
 
@@ -143,7 +146,7 @@ EOF
       - name: Get current date
         id: date
         run: |
-          echo "DATE_STR=$(date +"%Y%m%d")" >> $GITHUB_OUTPUT
+          echo "DATE_STR=$(TZ='Asia/Tokyo' date +"%Y%m%d")" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -152,7 +155,9 @@ EOF
           name: NetHackJP 5.0.0 Weekly Build (${{ steps.date.outputs.DATE_STR }})
           body_path: release_readme.txt
           generate_release_notes: true
-          files: release_files/*.zip
+          files: |
+            release_files/*.zip
+            release_readme.txt
           draft: false
           prerelease: false
 
