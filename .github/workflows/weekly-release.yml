@@ -1,4 +1,4 @@
-# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-04.
+# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-05.
 name: Weekly Release
 
 on:
@@ -65,7 +65,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y build-essential bison flex libncurses-dev uuid-dev pkg-config \
-            libx11-dev libxaw7-dev libxt-dev libxpm-dev libxft-dev libfontconfig1-dev xfonts-utils zip
+            libx11-dev libxaw7-dev libxt-dev libxpm-dev libxft-dev libfontconfig1-dev xfonts-utils zip curl
 
       - name: Build NetHackJP (Linux)
         run: |

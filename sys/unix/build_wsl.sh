@@ -1,4 +1,4 @@
-# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03.
+# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-05.
 #!/bin/sh
 # NetHackJP build script for WSL (Linux)
 # Usage: ./sys/unix/build_wsl.sh [hints_file]
@@ -57,6 +57,12 @@ if grep -q -- "-DHAVE_XIM" src/Makefile 2>/dev/null; then
     echo "XIM support: ENABLED (-DHAVE_XIM detected in src/Makefile)"
 else
     echo "XIM support: DISABLED (HAVE_XIM not set; check linux-jp hints)"
+fi
+
+# NetHackJP: Fetch Lua sources if not already present
+if [ ! -f "lib/lua-5.4.8/src/lua.h" ]; then
+    echo "Fetching Lua 5.4.8 prerequisites..."
+    make fetch-lua
 fi
 
 echo "Building prerequisites (lua_support)..."
