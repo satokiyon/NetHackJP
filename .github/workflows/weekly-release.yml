@@ -64,8 +64,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential bison flex libncursesw5-dev libuuid-dev pkg-config \
-            libx11-dev libxaw7-dev libxt-dev libxpm-dev libxft-dev libfontconfig1-dev bdftopcf xfonts-utils zip
+          sudo apt install -y build-essential bison flex libncurses-dev uuid-dev pkg-config \
+            libx11-dev libxaw7-dev libxt-dev libxpm-dev libxft-dev libfontconfig1-dev xfonts-utils zip
 
       - name: Build NetHackJP (Linux)
         run: |
