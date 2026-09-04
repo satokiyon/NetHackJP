@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-04. -->
 <!--
   IMPORTANT POLICY FOR NetHackJP-ONLY MODIFICATIONS
   =================================================
@@ -48,7 +48,10 @@
 Linux (Ubuntu / Debian 等) 上でビルドを行う場合は、事前に以下のパッケージをインストールしてください。
 ```bash
 sudo apt update
-sudo apt install build-essential libncursesw5-dev liblua5.4-dev pkg-config gdb libx11-dev libxft-dev libxpm-dev libxaw7-dev libxt-dev
+sudo apt install build-essential libncursesw5-dev liblua5.4-dev pkg-config gdb \
+                 libx11-dev libxft-dev libxpm-dev libxaw7-dev libxt-dev fonts-noto-cjk
+# X11 GUI 版で日本語入力（getlin / askname ダイアログ等）に fcitx5 を使用する場合（§2.2.2 の「fcitx5 の設定と起動」を参照）
+sudo apt install fcitx5 fcitx5-frontend-gtk3 fcitx5-modules fcitx5-mozc
 ```
 
 | パッケージ | 用途 |
@@ -60,6 +63,7 @@ sudo apt install build-essential libncursesw5-dev liblua5.4-dev pkg-config gdb l
 | `gdb` | パニックトレース (`PANICTRACE_GDB`) によるクラッシュ解析。実行時に必要 |
 | `libx11-dev` / `libxft-dev` / `libxaw7-dev` 等 | X11 GUI ポート (UTF-8 Xft / Athena Widgets) のビルド・描画ライブラリ |
 | `fonts-noto-cjk` (`Noto Sans CJK JP`) | X11 GUI ポートで日本語・墓石死因の文字化けを防ぐ日本語 CJK フォントパッケージ |
+| `fcitx5` / `fcitx5-mozc` 等 | X11 GUI ポートで getlin / askname ダイアログへの日本語入力（XIM）を行う IM サーバと変換エンジン（§2.2.2 参照） |
 
 > [!NOTE]
 > `gdb` は **実行時**にも参照されます。`sysconf` の `PANICTRACE_GDB=1` が有効な状態で `gdb` が存在しない場合、クラッシュ時に追加のバックトレース情報が取れないだけでなく、起動に失敗するケースもあります。インストールしておくことを強く推奨します。
@@ -78,11 +82,11 @@ sudo apt install build-essential libncursesw5-dev liblua5.4-dev pkg-config gdb l
 ### 2.2. Linux / WSL ポートの開発・ビルド (GNU Make / GCC)
 WSL または Linux 環境上で、ワンステップ用ビルドスクリプトを実行して Makefile の生成とビルドを一括で行うことができます。
 - **実行スクリプト**: `sh sys/unix/build_wsl.sh`
-- スクリプト実行により、日本語対応ヒントファイル `sys/unix/hints/linux-jp` が使用され、`src/nethack` に `tty` および `curses`（`ncursesw` による UTF-8 日本語表示対応）の両インターフェースに対応した実行ファイルが生成されます。
+- スクリプト実行により、日本語対応ヒントファイル `sys/unix/hints/linux-jp` が使用され、`src/nethack` に `tty` / `curses`（`ncursesw` による UTF-8 日本語表示対応）/ `X11`（Xft UTF-8 描画 + XIM 日本語入力対応）の **3 インターフェースに対応した実行ファイル**が生成されます。
 - *手動でステップを実行する場合*:
   ```bash
   sh sys/unix/setup.sh sys/unix/hints/linux-jp
-  make -j$(nproc) WANT_WIN_CURSES=1 WANT_WIN_TTY=1 WANT_DEFAULT=tty all
+  make WANT_WIN_CURSES=1 WANT_WIN_TTY=1 WANT_WIN_X11=1 WANT_DEFAULT=tty all x11tiles
   ```
 
 #### 2.2.1. インストール（`make install`）— 必須
@@ -111,9 +115,10 @@ make install
 | `cp src/nethack playground/` | 実行ファイルをコピー |
 | `cp dat/nhdat playground/` | 日本語データリソース（DLB）をコピー |
 | `cp sys/unix/sysconf playground/` | システム設定ファイルをコピー |
+| X11 関連ファイルの配置 | `playground/x11tiles`（タイルセット）、`playground/NetHack.ad`（X リソース）、`nh10.pcf` / `fonts.dir`（フォント）、`rip.xpm` 等をコピー |
 | `touch playground/record` 等 | ハイスコア・ログ・ライブログファイルを新規作成 |
 
-#### 2.2.2. 実行とウィンドウポート（`windowtype`）設定
+#### 2.2.2. 実行とウィンドウポート（tty / curses / X11）
 
 `make install` が完了したら、`playground/nethack` を起動します。
 
@@ -128,50 +133,111 @@ export PATH="$PATH:$(pwd)/playground"
 nethack
 ```
 
-##### `windowtype` オプション設定（.nethackrc）
-`build_wsl.sh` でビルドされたバイナリは `tty` と `curses` の両ウィンドウポートに対応しています。
-ホームディレクトリ（`~/.nethackrc`）またはカレントディレクトリの `.nethackrc` にて `windowtype` を設定することで画面表示を切り替えることができます。
+生成バイナリは 3 ポートに対応しており、`-w` コマンドラインオプションまたは `~/.nethackrc`（ホームディレクトリ）／カレントディレクトリの `.nethackrc` の `windowtype` で切り替えます（コマンドライン指定が設定ファイルより優先されます）。
 
-- **curses インターフェース（推奨）**:
-  ```text
-  OPTIONS=windowtype:curses,align_message:top,align_status:right
-  ```
-- **X11 GUI インターフェース**:
-  ```text
-  OPTIONS=windowtype:X11
-  ```
-  *(または `NetHack.ad` リソースを指定して `XAPPLRESDIR=./playground ./playground/nethack -wX11` や、リリースパッケージに同封されている `./nethackW` スクリプトで起動。リポジトリ直下のサンプル設定ファイル `.nethackrc.X11` を `~/.nethackrc` としてコピーして利用可能です。なお X11版のタイルセットはファイル名が `x11tiles` 固定であり、タイルの画像サイズは自動判定されます)*
-- **tty インターフェース（デフォルト）**:
-  ```text
-  OPTIONS=windowtype:tty
-  ```
+##### (a) tty インターフェース（デフォルト）
+UTF-8 対応ターミナル（Windows Terminal 等）で起動します。
+
+```bash
+playground/nethack        # ビルド時のデフォルト（WANT_DEFAULT=tty）
+playground/nethack -wtty  # 明示指定
+```
+
+```text
+# ~/.nethackrc
+OPTIONS=windowtype:tty
+```
+
+##### (b) curses インターフェース（CUI では推奨）
+`ncursesw` による UTF-8 日本語表示対応です。
+
+```bash
+playground/nethack -wcurses
+```
+
+```text
+# ~/.nethackrc
+OPTIONS=windowtype:curses,align_message:top,align_status:right
+```
+
+##### (c) X11 GUI インターフェース
+X リソース（`NetHack.ad`）とタイルセット（`x11tiles`）は `make install` で `playground/` に配置済みです。`XAPPLRESDIR` を `playground/` に向けて起動します（WSLg 内蔵の X サーバ、または外部 X サーバ上で実行）。
+
+```bash
+XAPPLRESDIR=./playground ./playground/nethack -wX11
+```
+
+```text
+# ~/.nethackrc（リポジトリ直下のサンプル `.nethackrc.X11` を `~/.nethackrc` としてコピーしてもよい）
+OPTIONS=windowtype:X11
+```
+
+※ リリースパッケージでは同封の `./nethackW` スクリプトで起動できます。X11 版のタイルセットはファイル名が `x11tiles` 固定で、タイルの画像サイズは自動判定されます。
+※ 日本語入力（`#名前` `#願い` 等の getlin ダイアログ）を使用する場合は、事前に fcitx5 を起動してください（下記「fcitx5 の設定と起動」）。
+
+##### (d) fcitx5 の設定と起動（X11 版で日本語入力する場合）
+X11 版では getlin / askname ダイアログ（`#名前`、`#願い`、`#虐殺`、起動時のキャラクター名入力等）で XIM 経由の日本語入力が可能です。fcitx5 は **nethack を起動する前に**準備します。
+
+1. インストール（1 回のみ）:
+   ```bash
+   sudo apt install -y fcitx5 fcitx5-frontend-gtk3 fcitx5-modules fcitx5-mozc
+   ```
+   （変換エンジンは `fcitx5-mozc` のほか `fcitx5-anthy` 等でも可）
+2. 環境変数の設定（`~/.bashrc` と `~/.profile` に追記）:
+   ```bash
+   export LANG=ja_JP.UTF-8
+   export XMODIFIERS=@im=fcitx   # fcitx5 は XIM サーバ名として "fcitx" を登録する
+   export GTK_IM_MODULE=fcitx
+   export QT_IM_MODULE=fcitx
+   export SDL_IM_MODULE=fcitx
+   ```
+   （`xim_init()` は `C`/`POSIX` ロケール時に `C.UTF-8` へのフォールバックを試みるため、`ja_JP.UTF-8` が未生成でも `C.UTF-8` が利用可能であれば動作します）
+3. fcitx5 の起動（nethack を起動する **同じシェル／セッション** で実行）:
+   ```bash
+   fcitx5 -d &
+   pgrep -a fcitx5   # 起動確認
+   ```
+4. X11 版の起動と確認:
+   ```bash
+   XAPPLRESDIR=./playground ./playground/nethack -wX11
+   ```
+   - stderr に `XIM: connected to input method` と出力されれば fcitx5 との接続成功。
+   - `XIM: XOpenIM failed` と出た場合は `pgrep -a fcitx5` と `echo $XMODIFIERS` を確認し、**新しいターミナルで nethack を起動してください**（既存ターミナルには環境変数の変更が反映されません）。fcitx5 未起動時でも ASCII 入力は動作します。
+5. 入力の切替: ダイアログ内で **Ctrl+Space** で日本語入力モードをトグルします。確定は Enter / Space で、確定文字列が入力欄に挿入されダイアログは閉じないため、もう一度 Enter で OK します（詳細は §4.12）。
+6. IM を無効化したい場合は `~/.nethackrc` に `OPTIONS=use_xim:off` を指定します（デフォルトは on）。
 
 > [!NOTE]
-> `hints/linux-jp` 内で `WANT_WIN_X11 = 1` および `HAVE_NCURSESW = 1` が定義されているため、生成されるバイナリは `tty`, `curses`, `X11` の 3 ポートマルチウィンドウに対応します。`X11` 使用時には Xft による日本語 TrueType/OpenType フォント描画および XIM ロケール入力（`XtSetLanguageProc`）により、GUI 上で UTF-8 日本語表示・入力が正常に行われます。
+> `hints/linux-jp` 内で `WANT_WIN_X11 = 1` および `HAVE_NCURSESW = 1` が定義されているため、生成されるバイナリは `tty`, `curses`, `X11` の 3 ポートマルチウィンドウに対応します。`X11` 使用時には Xft による日本語 TrueType/OpenType フォント描画が有効です（日本語 CJK フォントが未導入の場合は文字が白四角＝豆腐で表示されます）。マップ画面等の通常操作は 1 バイト＝1 コマンドのため IM を経由せず、日本語入力が有効なのは getlin / askname ダイアログのみです（§4.11 / §4.12）。
 
 #### 2.2.3. まとめ（WSL での初回セットアップ全体フロー）
 
 ```bash
 # (1) 依存パッケージのインストール（初回のみ）
 sudo apt update
-sudo apt install -y build-essential libncursesw5-dev liblua5.4-dev pkg-config gdb
+sudo apt install -y build-essential libncursesw5-dev liblua5.4-dev pkg-config gdb \
+                    libx11-dev libxft-dev libxpm-dev libxaw7-dev libxt-dev fonts-noto-cjk
+# X11 版で日本語入力する場合（詳細は §2.2.2「fcitx5 の設定と起動」）
+sudo apt install -y fcitx5 fcitx5-frontend-gtk3 fcitx5-modules fcitx5-mozc
 
 # (2) リポジトリのクローン（初回のみ）
 # git clone https://github.com/satokiyon/NetHackJP.git
 # cd NetHackJP
 
-# (3) ビルド（tty & curses 両対応バイナリの生成）
+# (3) ビルド（tty / curses / X11 3ポート対応バイナリの生成）
 sh sys/unix/build_wsl.sh
 
-# (4) インストール（playground/ を構築）
+# (4) インストール（playground/ を構築。NetHack.ad と x11tiles も配置される）
 make install
 
-# (5) 起動
-# CUI (tty / curses) で起動する場合
-playground/nethack
+# (5) 日本語入力の準備（X11 版で日本語入力する場合のみ）
+export LANG=ja_JP.UTF-8
+export XMODIFIERS=@im=fcitx
+fcitx5 -d &
 
-# GUI (X11) で起動する場合
-XAPPLRESDIR=./playground ./playground/nethack -wX11
+# (6) 起動
+playground/nethack                                   # tty インターフェース
+playground/nethack -wcurses                          # curses インターフェース
+XAPPLRESDIR=./playground ./playground/nethack -wX11  # X11 GUI インターフェース
 ```
 
 > [!TIP]
@@ -470,13 +536,13 @@ WSL や Linux 環境において、NetHack 起動時に Linux のログインユ
   3. **`sys/unix/Makefile.src`**: `win/X11/winxim.c` と `win/X11/wingetlin.c` を `WINX11SRC` / `WINX11OBJ` に追加し、対応する `$(TARGETPFX)winxim.o` / `$(TARGETPFX)wingetlin.o` ビルドルールを追加。
   4. **`sys/unix/hints/linux-jp`**: `HAVE_XIM=1` 設定と `CFLAGS += -DHAVE_XIM` を追加。`winxim.o` を `WINX11OBJ` に追加。
   5. **`win/X11/winX.c`**: `X11_init_nhwindows` で `xim_init(XtDisplay(toplevel))`、`X11_exit_nhwindows` で `xim_cleanup()` を呼ぶ。`nh_XtPopdown` で `xim_focus_out(NULL)` を呼んで popup 終了時に IM focus を解放。`key_event_to_utf8` を新設（Phase 4）。
-  6. **`win/X11/winmap.c`**: `map_input` の KeyPress 処理で `Xutf8LookupString` を使い UTF-8 バイト列を取得。Meta ビットは先頭バイトにのみ付与（UTF-8 連続バイトを破壊しない）。map IC を lazy 作成し、`xim_focus_in` で focus を移す（Phase 2 + Phase 5）。
-  7. **`win/X11/wingetlin.c` (新規)**: `XtNinternational=True` を使った Xaw AsciiText は WSLg/XWayland + fcitx5 で engage しなかったため、`asciiTextWidgetClass` を自前の `labelWidgetClass` ベースに置換。`CreateXimDialog` / `XimDialogSetPrompt` / `XimDialogSetResponse` / `XimDialogGetResponse` / `XimDialogFocusInput` の API を提供。`MapNotify` ハンドラで `XSetInputFocus` を呼んで focus を確定し、`XIM IC` を `xim_create_ic` で生成 + `xim_focus_in`。
+  6. **`win/X11/winmap.c`**: かつては `map_input` で XIM 経路（map IC の lazy 生成と `xim_focus_in`）を使用したが、メインウィンドウで IM が勝手に engage する問題のため撤去済み（§4.12）。現在は `XLookupString` のみを使用し、メインウィンドウは IC を一切 focus しない。
+  7. **`win/X11/wingetlin.c` (新規)**: `XtNinternational=True` を使った Xaw AsciiText は WSLg/XWayland + fcitx5 で engage しなかったため、`asciiTextWidgetClass` を自前の `labelWidgetClass` ベースに置換。`CreateXimDialog` / `XimDialogSetPrompt` / `XimDialogSetResponse` / `XimDialogGetResponse` / `XimDialogFocusInput` の API を提供。レイアウト・キー分類・フォーカス保存/復元を含む最終仕様は §4.12 を参照。
   8. **`win/X11/winmisc.c`**: `ec_key`（`#versuswizard` 等の extended command）をマルチバイト UTF-8 対応に。`key_event_to_utf8` で全バイトを `ec_chars[]` に append して `strncmp` で `command_list[]` と比較。
   9. **`include/winX.h`**: Phase 4 で `key_event_to_utf8` の extern 宣言追加。
 * **既知の制限**:
   - yn prompts / role / race / gender / alignment 選択は単一文字入力のため、ASCII のみ対応（`や` を打鍵しても先頭バイト 0xE3 が `y`/`n` にマッチしないため無視）。これは仕様。将来の拡張で YN プロンプトも XIM 経由にできるが、yn の本質的意味（y/n/?/q の即応）からは離れる。
-  - `nh_XtPopdown` で `xim_focus_out` を呼ぶが、map IC は次回 `map_input` の最初の KeyPress 時に lazy に focus される。即応性が必要なら明示的 refocus を追加。
+  - メインウィンドウ（`map_input`）は XIM 経路を持たない（§4.12）。IM は getlin / askname ダイアログでのみ engage し、プレイ中に日本語入力 UI が起動することはない。
   - XtNinternational (Athena Widgets 内部 XIM) は WSLg/XWayland + fcitx5 構成で機能しなかったため、`wingetlin.c` の自前実装に全面置換した。
 * **実行時トグル (Phase 7)**:
   - `OPTIONS=use_xim:on`（デフォルト）／ `OPTIONS=use_xim:off` で XIM の有効・無効を切り替え可能。
@@ -491,9 +557,38 @@ WSL や Linux 環境において、NetHack 起動時に Linux のログインユ
   - アップストリーム NetHack 5.0 に XIM 対応がマージされた場合は、本セクションの全独自拡張を取り消してアップストリーム版に追従する。
   - 追従時は `winxim.c` / `wingetlin.c` を削除し、`Makefile.src` から関連エントリを削除し、`linux-jp` から `HAVE_XIM=1` を削除し、`flag.h` / `optlist.h` / `options.c` / `winprocs.h` の XIM 関連エントリを取り消す。
 
+### 12. X11 getlin / askname ダイアログ（`wingetlin.c`）の最終仕様
+
+Xaw AsciiText の `XtNinternational=True` は WSLg/XWayland + fcitx5 構成で IM が engage しなかったため（§4.11 Phase 3）、`labelWidgetClass` ベースの自前ダイアログ `win/X11/wingetlin.c` を新設し、XIM を直接駆動している。実装過程で判明した一連の問題（フォーム縮潤・ボタン枠線不可視・ESC 経路のクラッシュ・確定文字取りこぼし・stale IC・入力欄最低幅・メインウィンドウでの IM 誤起動）はすべて解決済みで、現在は次の最終仕様で動作する。
+
+#### 最終動作仕様
+- **表示**: 入力欄は空欄時でも半角10文字分以上の幅を保ち、11文字以上でテキスト幅に追従し、全削除で最低幅へ戻る。OK / Cancel ボタンは角丸枠線（`NetHack.ad` の `shapeStyle: roundedRectangle`）が表示される。
+- **キー操作**: Enter → OK（日本語確定文字列が Enter イベントに乗って届く場合は先に追記され、ダイアログは閉じない。もう一度 Enter で OK）、Space による確定も同様、Escape → キャンセル、BackSpace / Delete → 1文字削除。これらのキーが文字として挿入されることはない。
+- **IM の engage 範囲**: getlin / askname ダイアログ内のみ。メインウィンドウ（マップ等）は一切 IC を focus しないため、プレイ中に日本語入力 UI が勝手に起動することはない。
+- **再利用**: ダイアログを開くたびに `positionpopup()` が Window を再作成するが、IC が自動再生成・再結合されるため何回開き直っても正常に動作する。
+- **フォーカス**: ダイアログを閉じると X 入力フォーカスは取得前の状態（通常 PointerRoot のポインタ追従モデル）へ復元される。
+
+#### 実装構成（最終形）
+
+| ファイル | 内容 |
+|---|---|
+| `win/X11/wingetlin.c` | 自前ダイアログ本体。全子にチェーン制約（`XtChainTop` / `XtChainLeft`）と `XtNresizable=True` を付与し Form の縮潤を防止。入力欄の最低幅は `XIM_GETLIN_MIN_CHARS`（10半角文字、実測フォント幅と 8px/文字のフォールバックの大きい方）で、`XtNlabel` 設定 → bitmap 更新 → **明示 `XtNwidth` を最後に別 `XtSetValues` で適用**（Xaw Label は label / bitmap 変更時に自前のリサイズ要求を発行し、同一呼び出し内の幅指定を上書きするため）。キーハンドラは `xim_lookup_utf8()` を keysym 判定より先に実行し、戻りの status / keysym で分類する（`XLookupChars`＝keysym を持たない IM 確定のみ追記、`XLookupBoth` かつ編集キー＝keysym 処理へフォールスルー、`XLookupBoth` かつ非編集キーで表示可能 ASCII＝追記、`XLookupKeySym`＝keysym 処理、`XLookupNone`＝IM 消費として握り潰し）。Escape 経路は `state->form` を明示渡し（イベントハンドラの `client_data` は state ポインタであり Widget ではないため）。MapNotify ハンドラは `CreateXimDialog()` 内（realize 前）に**常設**で登録され、発火のたびに `XGetInputFocus()` で直前の X フォーカスを保存 → `XSetInputFocus(OK)` → `xim_create_ic()`（Window 変更時は自動再生成）→ `xim_focus_in()` を行う。`XimDialogReleaseInputFocus()` が `nh_XtPopdown()` から呼ばれ、保存したフォーカスを復元する（OK / Cancel / Escape / WM 削除の全終了経路を 1 箇所で回収）。 |
+| `win/X11/winxim.c` | IC キャッシュを Window ID 連動に拡張。エントリに生成時の `Window` を保持し、`XtWindow(w)` が変化していたら旧 IC を `XDestroyIC()` して再生成する（`positionpopup()` が開くたび Window を再作成するため必須）。破棄前には `xim_current_focused_ic` をクリアする。 |
+| `win/X11/winlabel.c` / `include/winX.h` | `X11_label_string_width(Widget, const char *)` を新設（Xft 実測、非 XFT は `XtNfont` リソースへフォールバック）。winX.h に `XimDialogReleaseInputFocus` / `xim_focus_clear` の宣言を追加。 |
+| `win/X11/winX.c` | `nh_XtPopdown()` から `XimDialogReleaseInputFocus()` を呼ぶ。 |
+| `win/X11/winmap.c` | `map_input()` から XIM 経路を削除し、純粋な `XLookupString` に戻した（Phase 2 実装の取り止め）。メインウィンドウは IC を focus しないため、IM が engage する経路が構造的に存在しない。日本語入力は getlin / askname ダイアログ専用。 |
+
+* **マーカータグ**:
+  - `/* NetHackJP: XIM-aware getlin / askname dialog. */`（wingetlin.c 冒頭）
+  - `/* NetHackJP: XIM commit capture, persistent IC/focus rebinding and minimum input-field width */`（wingetlin.c 冒頭）
+  - `/* NetHackJP: recreate stale ICs when the owning widget's X window is re-created */`（winxim.c 冒頭）
+  - `/* NetHackJP: map input deliberately does NOT route through the input method */`（winmap.c / `map_input`）
+  - `X11_label_string_width` / `XimDialogReleaseInputFocus` の関数コメント（winlabel.c / wingetlin.c / winX.c / winX.h）
+* **対応ファイル**: `win/X11/wingetlin.c`、`win/X11/winxim.c`、`win/X11/winlabel.c`、`win/X11/winX.c`、`win/X11/winmap.c`、`include/winX.h`
+* **削除手順**: `wingetlin.c` / `winxim.c` 自体が独自実装であるため、アップストリームへ戻す場合はファイルごと削除し、`Makefile.src` / `linux-jp` のエントリ、`nh_XtPopdown` の `XimDialogReleaseInputFocus()` 呼び出し、winmap.c の注釈コメント、winX.h の追加宣言を取り消す。`X11_label_string_width` のみ winlabel.c 内の独立追加のため単独で取り消し可能。
+* **アップストリーム追従手順**: 上流 NetHack-5.0 に XIM 対応（XFilterEvent を含む IM 統合、または `XtNinternational` ベースの実装）が導入された場合、`wingetlin.c` / `winxim.c` を削除して上流設計に全面的に追従する。`X11_label_string_width` は上流に同等の測定 API が追加された場合はそちらへ移行する。
+
 ---
-
-
 
 ## 5. ライセンスと NetHack License 2(a) への対応方針
 

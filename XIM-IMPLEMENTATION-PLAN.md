@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-04. -->
 # NetHackJP X11 ポート XIM (X Input Method) 実装計画
 
 ## 背景
@@ -135,6 +135,24 @@ X Athena Widgets の国際化対応は古く、preedit 中の Enter 衝突等の
 ### WSLg / XWayland の XIM 対応
 
 WSL2 + WSLg の XIM 対応は XWayland 経由のため、WSL のバージョンやディストリビューションによって fcitx5 が動かない可能性がある。動かない環境では代替手段（curses ポート）を案内。
+
+### getlin ダイアログの IM 統合に関する修正履歴（2026-09-04, DEVELOPMENT.md §4.12）
+
+自前 getlin ダイアログ (`wingetlin.c`) の運用で発覚した問題と修正：
+
+* **XtNinternational での fcitx5 engage 失敗**（§4.11）→ `labelWidgetClass` ベースの自前ダイアログに全面置換
+* **チェーン制約欠如によるフォーム縮潤・ボタン枠線不可視**（§4.12）→ 全子に chain hints + `XtNresizable=True`、`XtNborderWidth=0` の撤去
+* **ESC 経路の `client_data` 不整合クラッシュ**（§4.12）→ `xim_getlin_cancel_button` へ `state->form` を明示渡し
+* **確定文字取りこぼし・stale IC・入力欄最低幅**（§4.12）:
+  - キーハンドラを XIM lookup 最優先に再構成（Enter/Space キーイベントに乗る commit を確実に捕獲。確定時にダイアログが閉じる問題を解消）
+  - IC キャッシュを Window ID 連動に（`positionpopup()` が開くたび Window を再作成するため、stale IC により fcitx5 が disengage し全入力が不能になる問題を解消）
+  - MapNotify フォーカスハンドラを常設化し `CreateXimDialog()` で realize 前に登録（旧 1 回きり型は初回オープンで発火せず、2回目以降も 1 オープン遅れで不定）
+  - 入力欄は空欄時でも半角10文字分以上の幅を保証（`X11_label_string_width()` による実測、全削除で最低幅へ復帰）
+* **第2ラウンド修正**（§4.12）:
+  - 明示幅を label/bitmap 更新の**後**に別 `XtSetValues` で適用（Xaw Label の自動リサイズが同一呼び出し内の幅指定を上書きするため）
+  - XIM lookup の結果を status/keysym で識別（`XLookupChars` のみ追記、編集キーの素の変換 `\r`/`\b`/0x7F が文字として挿入される問題を解消）
+  - ダイアログの X フォーカス取得前に保存し `XimDialogReleaseInputFocus()`（`nh_XtPopdown` 経由）で復元（PointerRoot ポインタ追従モデルの維持）
+  - **`winmap.c::map_input` の XIM 経路を削除**（Phase 2 実装の取り止め）。メインウィンドウは IC を focus しないため IM が engage する経路が構造的に消滅し、プレイ中に日本語入力 UI が勝手に起動する問題を解消。日本語入力は getlin / askname ダイアログ専用。
 
 ## ロールバック戦略
 
