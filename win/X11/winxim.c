@@ -1,4 +1,9 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-04. */
+/* NetHackJP: recreate stale ICs when the owning widget's X window is
+ * re-created.  positionpopup() unrealizes/re-realizes the getlin popup
+ * on every dialog open, so Window IDs change; an IC bound to the old
+ * window made fcitx5 disengage and swallowed every keystroke.  See
+ * xim_create_ic() and DEVELOPMENT.md §4.12. */
 /* NetHackJP: XIM (X Input Method) infrastructure for the X11 window port.
  *
  * This module provides a thin wrapper around XOpenIM / XCreateIC /
@@ -56,36 +61,52 @@ static XIM xim_im_obj = (XIM) NULL;
  * by xim_create_ic() is NULL and lookups fall back to XLookupString. */
 static boolean xim_active_flag = FALSE;
 
+/* NetHackJP: the IC that currently holds XIM focus (see the focus
+ * tracking section below).  Declared here so xim_create_ic() can clear
+ * it when it destroys a stale IC whose widget's X window was
+ * re-created. */
+static XIC xim_current_focused_ic = (XIC) 0;
+
 /* ---- per-widget IC cache --------------------------------------------- */
 
 /* We keep a small fixed-size table of (Widget, XIC) pairs so that
  * repeated xim_create_ic() calls for the same Widget return the same IC.
  * A Widget is reused for the lifetime of the X11 application, so this
  * list never shrinks; entries are appended once and freed in
- * xim_cleanup(). */
+ * xim_cleanup().
+ *
+ * NetHackJP: each entry also records the X Window the IC was created
+ * for.  positionpopup() calls XtUnrealizeWidget/XtRealizeWidget on
+ * every dialog open, which hands the widget brand-new Window IDs; an
+ * IC bound to the old window keeps XNClientWindow/XNFocusWindow
+ * pointing at a dead window, so the IM server disengages and
+ * Xutf8LookupString() stops returning anything.  xim_create_ic()
+ * compares the recorded window against the widget's current window and
+ * destroys + recreates the IC when they differ. */
 typedef struct xim_ic_entry {
     Widget w;
     XIC ic;
+    Window win;
 } xim_ic_entry;
 
 #define XIM_IC_CACHE_MAX 64
 static xim_ic_entry xim_ic_cache[XIM_IC_CACHE_MAX];
 static int xim_ic_cache_count = 0;
 
-static XIC
-xim_ic_cache_lookup(Widget w)
+static int
+xim_ic_cache_find(Widget w)
 {
     int i;
 
     for (i = 0; i < xim_ic_cache_count; ++i) {
         if (xim_ic_cache[i].w == w)
-            return xim_ic_cache[i].ic;
+            return i;
     }
-    return (XIC) 0;
+    return -1;
 }
 
 static void
-xim_ic_cache_store(Widget w, XIC ic)
+xim_ic_cache_store(Widget w, XIC ic, Window win)
 {
     if (xim_ic_cache_count >= XIM_IC_CACHE_MAX) {
         /* Should not happen in practice; if it does, drop the new IC
@@ -96,6 +117,7 @@ xim_ic_cache_store(Widget w, XIC ic)
     }
     xim_ic_cache[xim_ic_cache_count].w = w;
     xim_ic_cache[xim_ic_cache_count].ic = ic;
+    xim_ic_cache[xim_ic_cache_count].win = win;
     ++xim_ic_cache_count;
 }
 
@@ -207,6 +229,7 @@ xim_cleanup(void)
             XDestroyIC(xim_ic_cache[i].ic);
         xim_ic_cache[i].w = (Widget) 0;
         xim_ic_cache[i].ic = (XIC) 0;
+        xim_ic_cache[i].win = None;
     }
     xim_ic_cache_count = 0;
 
@@ -224,6 +247,13 @@ xim_cleanup(void)
  * The IC style is XIMPreeditNothing | XIMStatusNothing: we delegate the
  * preedit / status windows to the IM server (fcitx5) and never install
  * XIM callbacks.  This keeps the Xt event loop reentrancy story simple.
+ *
+ * NetHackJP: if the widget's X window changed since the cached IC was
+ * created (positionpopup() unrealizes and re-realizes the popup on
+ * every dialog open, which reassigns Window IDs), the stale IC is
+ * destroyed and a fresh one is created for the new window.  Without
+ * this, the IM server keeps an IC whose focus window no longer exists
+ * and silently stops delivering preedit/commit for it.
  */
 void *
 xim_create_ic(void *w_arg)
@@ -231,14 +261,10 @@ xim_create_ic(void *w_arg)
     Widget w = (Widget) w_arg;
     XIC ic;
     Window xwin;
+    int idx;
 
     if (!xim_active_flag || w == (Widget) 0)
         return (void *) 0;
-
-    /* If we have already created an IC for this widget, reuse it. */
-    ic = xim_ic_cache_lookup(w);
-    if (ic != (XIC) 0)
-        return (void *) ic;
 
     /* XCreateIC needs a Window that already exists.  If the widget is
      * not yet realized, we cannot create an IC; the caller should retry
@@ -250,16 +276,41 @@ xim_create_ic(void *w_arg)
     if (xwin == None)
         return (void *) 0;
 
+    idx = xim_ic_cache_find(w);
+    if (idx >= 0 && xim_ic_cache[idx].win == xwin)
+        return (void *) xim_ic_cache[idx].ic;
+
+    if (idx >= 0 && xim_ic_cache[idx].ic != (XIC) 0) {
+        /* Drop the stale IC.  Clear the focus tracker first so we
+         * never call XUnsetICFocus on a destroyed handle. */
+        if (xim_current_focused_ic == xim_ic_cache[idx].ic)
+            xim_current_focused_ic = (XIC) 0;
+        XDestroyIC(xim_ic_cache[idx].ic);
+        xim_ic_cache[idx].ic = (XIC) 0;
+    }
+
     ic = XCreateIC(xim_im_obj,
                    XNInputStyle,
                        XIMPreeditNothing | XIMStatusNothing,
                    XNClientWindow, xwin,
                    XNFocusWindow, xwin,
                    NULL);
-    if (ic == (XIC) 0)
+    if (ic == (XIC) 0) {
+        /* Remember the window even on failure so the next call retries
+         * with a fresh XCreateIC instead of returning a stale IC. */
+        if (idx < 0)
+            xim_ic_cache_store(w, (XIC) 0, xwin);
+        else
+            xim_ic_cache[idx].win = xwin;
         return (void *) 0;
+    }
 
-    xim_ic_cache_store(w, ic);
+    if (idx < 0)
+        xim_ic_cache_store(w, ic, xwin);
+    else {
+        xim_ic_cache[idx].ic = ic;
+        xim_ic_cache[idx].win = xwin;
+    }
     return (void *) ic;
 }
 
@@ -283,8 +334,10 @@ xim_destroy_ic(void *ic_arg)
  * automatically unfocus the previous one when a different widget
  * gains focus.  Without this, fcitx5 may keep delivering keystrokes
  * to an IC whose window is no longer mapped (e.g. after a popup is
- * dismissed) until the user clicks somewhere to reset focus. */
-static XIC xim_current_focused_ic = (XIC) 0;
+ * dismissed) until the user clicks somewhere to reset focus.
+ * The xim_current_focused_ic variable itself is declared in the
+ * module state section at the top of this file because
+ * xim_create_ic() also clears it when destroying a stale IC. */
 
 /*
  * Set XIM focus to `ic`.  If a different IC previously had focus,
@@ -318,8 +371,6 @@ xim_focus_in(void *ic_arg)
 void
 xim_focus_out(void *ic_arg)
 {
-    XIC ic = (XIC) ic_arg;
-
     nhUse(ic_arg);
     if (xim_current_focused_ic != (XIC) 0) {
         XUnsetICFocus(xim_current_focused_ic);

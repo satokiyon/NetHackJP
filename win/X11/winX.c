@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-04. */
 /* NetHack 5.0	winX.c	$NHDT-Date: 1781973110 2026/06/20 16:31:50 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.150 $ */
 /* Copyright (c) Dean Luick, 1992                                 */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -2977,6 +2977,15 @@ nh_XtPopdown(Widget w)
      * map window could still be sent to the dead popup's IC until
      * the next focus event arrives. */
     xim_focus_out(NULL);
+
+    /* NetHackJP: restore the X input focus that the getlin / askname
+     * dialog grabbed (a no-op unless one is currently open).  The
+     * dialog's MapNotify handler saves the previous focus before
+     * taking it; leaving the focus on the dialog's windows would make
+     * the server revert it to the toplevel shell when they unmap,
+     * abandoning the application's pointer-following focus model and
+     * letting the Japanese input UI engage in the main window. */
+    XimDialogReleaseInputFocus();
 
     XtPopdown(w);
     if (appResources.autofocus)

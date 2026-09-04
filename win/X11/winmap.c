@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-04. */
 /* NetHack 5.0	winmap.c	$NHDT-Date: 1781973109 2026/06/20 16:31:49 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.77 $ */
 /* Copyright (c) Dean Luick, 1992                                 */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -1112,16 +1112,6 @@ static int inbuf[INBUF_SIZE];
 static int incount = 0;
 static int inptr = 0; /* points to valid data */
 
-/* NetHackJP: XIM integration for map input (Phase 2).
- *
- * Per-window XIC for the map.  Created lazily on the first key event
- * because XCreateIC needs a realized Widget with a Window, which the
- * map window does not have at XtAppInitialize() time.  Caching is
- * performed inside winxim.c so we just keep the handle here. */
-#ifdef HAVE_XIM
-static void *xim_map_ic = (void *) 0;
-#endif
-
 /*
  * Keyboard and button event handler for map window.
  */
@@ -1182,46 +1172,15 @@ map_input(Widget w, XEvent *event, String *params, Cardinal *num_params)
             meta = !!(key->state & Mod1Mask);
             nbytes = XLookupString(key, keystring, MAX_KEY_STRING,
                                    (KeySym *) 0, (XComposeStatus *) 0);
-#ifdef HAVE_XIM
-            /* NetHackJP: try XIM (fcitx5 / ibus) BEFORE XLookupString.
-             * If the IM is not active, or no IC is available yet (widget
-             * not realized), or the IM did not produce a string (e.g.
-             * a bare modifier key), we keep the XLookupString result.
-             * XLookupString never produces a multi-byte UTF-8 sequence,
-             * so this is a strict superset of the legacy behaviour. */
-            if (xim_is_active()) {
-                char utf8buf[MAX_KEY_STRING];
-                int xim_n;
-
-                if (!xim_map_ic)
-                    xim_map_ic = xim_create_ic(window_list[WIN_MAP].w);
-                if (xim_map_ic) {
-                    /* NetHackJP: Phase 5 - refocus the map IC now that
-                     * the user is typing in the map again.  xim_focus_in
-                     * automatically unfocuses the previously-focused IC
-                     * (typically a dialog's IC), so fcitx5 will start
-                     * routing keystrokes to the map immediately. */
-                    xim_focus_in(xim_map_ic);
-                    /* We don't need the keysym or status here - map_input
-                     * is a low-level keystroke pump, not a yn-style
-                     * discrete-prompt consumer. */
-                    xim_n = xim_lookup_utf8(xim_map_ic, key, utf8buf,
-                                            (int) sizeof utf8buf,
-                                            NULL, NULL);
-                    if (xim_n > 0
-                        && xim_n < (int) sizeof keystring) {
-                        /* Replace the ASCII-only XLookupString output
-                         * with the IM-produced UTF-8 sequence. */
-                        (void) memcpy(keystring, utf8buf,
-                                      (size_t) xim_n);
-                        keystring[xim_n] = '\0';
-                        nbytes = xim_n;
-                    }
-                    /* XLookupNone etc.: leave the existing nbytes
-                     * (= 0 for modifier keys) as-is. */
-                }
-            }
-#endif /* HAVE_XIM */
+            /* NetHackJP: map input deliberately does NOT route through
+             * the input method.  Map commands are ASCII keystrokes; an
+             * IM engaged here (fcitx5 in its default Japanese mode for
+             * a fresh or never-toggled IC) ate the player's commands
+             * and popped the Japanese input UI up over the main window
+             * out of nowhere.  Japanese text input belongs in the
+             * getlin / askname dialogs, which drive the IM via
+             * wingetlin.c; the main window never focuses an IC, so the
+             * IM can never engage here (DEVELOPMENT.md §4.12). */
         }
  key_events:
         /* Modifier keys return a zero length string when pressed. */

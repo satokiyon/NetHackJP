@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-04. */
 /* NetHack 5.0	winX.h	$NHDT-Date: 1781973092 2026/06/20 16:31:32 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.69 $ */
 /* Copyright (c) Dean Luick, 1992                                 */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -391,6 +391,9 @@ extern void XimDialogSetPrompt(Widget, String);
 extern void XimDialogSetResponse(Widget, String);
 extern String XimDialogGetResponse(Widget);
 extern void XimDialogFocusInput(Widget);
+/* NetHackJP: restore the X input focus the getlin/askname dialog
+ * grabbed (called from nh_XtPopdown; DEVELOPMENT.md §4.12). */
+extern void XimDialogReleaseInputFocus(void);
 
 /* ### winxim.c ### (NetHackJP: XIM integration)
  *
@@ -409,6 +412,7 @@ extern void *xim_create_ic(void *); /* arg: Widget; returns XIC */
 extern void xim_destroy_ic(void *); /* arg: XIC */
 extern void xim_focus_in(void *);   /* arg: XIC */
 extern void xim_focus_out(void *);  /* arg: XIC */
+extern void xim_focus_clear(void);  /* reset tracking w/o XUnsetICFocus */
 /* xim_lookup_utf8 has no in-source fallback - callers must #ifdef HAVE_XIM */
 extern int xim_lookup_utf8(void *, XKeyEvent *,
                            char *, int,
@@ -422,6 +426,7 @@ extern int xim_lookup_utf8(void *, XKeyEvent *,
 #define xim_destroy_ic(ic)        ((void)0)
 #define xim_focus_in(ic)          ((void)0)
 #define xim_focus_out(ic)         ((void)0)
+#define xim_focus_clear()         ((void)0)
 #endif
 
 /* ### winX.c ### */
@@ -586,6 +591,10 @@ extern void X11_set_column_widths(Widget, const int *, unsigned);
 extern void X11_blink_labels(void);
 extern int X11_font_height(X11_Font *);
 extern int X11_column_width(Display *, X11_Font *, const char *, size_t);
+/* NetHackJP: measure the pixel width of a string with the label
+ * widget's font; used to enforce the getlin response field's minimum
+ * width (DEVELOPMENT.md §4.12). */
+extern int X11_label_string_width(Widget, const char *);
 
 /*
  * These are for widgets that use the enhanced label services only for text
