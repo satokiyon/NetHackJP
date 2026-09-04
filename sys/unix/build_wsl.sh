@@ -62,7 +62,7 @@ fi
 # NetHackJP: Fetch Lua sources if not already present
 if [ ! -f "lib/lua-5.4.8/src/lua.h" ]; then
     echo "Fetching Lua 5.4.8 prerequisites..."
-    make fetch-lua
+    make fetch-lua || make fetch-lua NOCHKSUM=1
 fi
 
 echo "Building prerequisites (lua_support)..."

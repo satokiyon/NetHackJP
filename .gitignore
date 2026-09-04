@@ -106,7 +106,8 @@ tmp/
 scratch/
 tools/
 .agent/
-submodules/
+submodules/*
+!submodules/CHKSUMS
 playground/
 sys/lib/
 
