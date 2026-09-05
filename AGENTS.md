@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-05. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-06. -->
 <!-- agent-ninja-START -->
 ## Agent Skills
 
@@ -299,5 +299,6 @@ Linux/WSL 環境の X11 ウィンドウポート（`win/X11/`）で fcitx5 / ibu
 3. **GitHub Actions ワークフロー内のスクリプト生成における YAML インデント保護**:
    - `run: |` ブロック内でシェルスクリプトファイルを生成する際、ヒアドキュメント（`cat << 'EOF'`）の本文を行頭（1桁目）から記述すると、YAML パーサーがトップレベルのキーと誤認して `ScannerError`（ワークフロー構文エラー）を引き起こします。
    - ファイル生成を行う際は、インデントを崩さない `{ echo '...'; } > file` 構文または `printf` を使用し、YAML のブロックインデントを厳格に保持してください。
+
 
 
