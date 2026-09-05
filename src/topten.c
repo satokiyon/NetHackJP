@@ -491,6 +491,8 @@ jp_translate_killer_text_for_display(
             Snprintf(outmain, sizeof outmain, "魔法の杖に倒された");
         } else if (!strcmpi(killer, "scroll of fire")) {
             Snprintf(outmain, sizeof outmain, "火炎の巻物に倒された");
+        } else if (!strcmpi(killer, "scroll of genocide")) {
+            Snprintf(outmain, sizeof outmain, "虐殺の巻物に倒された");
         } else if (!strcmpi(killer, "potion of acid")) {
             Snprintf(outmain, sizeof outmain, "酸の薬に倒された");
         } else if (!strcmpi(killer, "potion of holy water")) {
@@ -668,7 +670,13 @@ jp_translate_killer_text_for_display(
                 if (otyp >= 0 && otyp < NUM_OBJECTS) {
                     Snprintf(kbuf, sizeof kbuf, "%s", jp_item_name(otyp));
                 } else {
-                    Snprintf(kbuf, sizeof kbuf, "%s", killer);
+                    char fbuf[BUFSZ];
+                    jp_translate_food_or_corpse(fbuf, sizeof fbuf, killer);
+                    if (*fbuf && strcmpi(fbuf, killer)) {
+                        Snprintf(kbuf, sizeof kbuf, "%s", fbuf);
+                    } else {
+                        Snprintf(kbuf, sizeof kbuf, "%s", killer);
+                    }
                 }
             }
 
@@ -842,6 +850,8 @@ jp_translate_killer_text_for_display(
             char fbuf[BUFSZ];
             jp_translate_food_or_corpse(fbuf, sizeof fbuf, what + 10);
             Snprintf(outmain, sizeof outmain, "%sを閉じ込めて石化した", fbuf);
+        } else if (!strcmpi(what, "deliberately meeting Medusa's gaze")) {
+            Snprintf(outmain, sizeof outmain, "意図的にメドゥーサの視線と目を合わせたことで石化した");
         } else {
             char fbuf[BUFSZ];
             jp_translate_food_or_corpse(fbuf, sizeof fbuf, what);
@@ -859,18 +869,43 @@ jp_translate_killer_text_for_display(
         } else {
             Snprintf(outmain, sizeof outmain, "%sでスライム化した", buf);
         }
-    } else if (!strcmpi(core, "reverting to unhealthy human form")
-               || !strcmpi(core, "reverting to unhealthy elf form")
-               || !strcmpi(core, "reverting to unhealthy dwarf form")
-               || !strcmpi(core, "reverting to unhealthy gnome form")
-               || !strcmpi(core, "reverting to unhealthy orc form")) {
-        Snprintf(outmain, sizeof outmain, "不健康な姿に戻って倒れた");
+    } else if (!strncmpi(core, "reverting to unhealthy ", 23)
+               && strstr(core, " form")) {
+        char rbuf[BUFSZ];
+        const char *p = strstr(core, " form");
+        size_t rlen = p - (core + 23);
+        if (rlen < sizeof rbuf) {
+            memcpy(rbuf, core + 23, rlen);
+            rbuf[rlen] = '\0';
+            const char *rname = skip_english_article(rbuf);
+            const char *racename = NULL;
+            int i;
+            for (i = 0; races[i].noun; ++i) {
+                if (!strcmpi(rname, races[i].noun)) {
+                    racename = jp_pmname_from_idx(races[i].mnum, NEUTRAL);
+                    break;
+                }
+            }
+            if (!racename) {
+                int mndx, gend;
+                mndx = name_to_mon(rname, &gend);
+                if (mndx >= LOW_PM && mndx < NUMMONS)
+                    racename = jp_pmname_from_idx(mndx, 0);
+            }
+            if (racename) {
+                Snprintf(outmain, sizeof outmain, "不健康な%sの姿に戻って倒れた", racename);
+            } else {
+                Snprintf(outmain, sizeof outmain, "不健康な%sの姿に戻って倒れた", rname);
+            }
+        } else {
+            Snprintf(outmain, sizeof outmain, "不健康な姿に戻って倒れた");
+        }
     } else if (!strcmpi(core, "killed while stuck in creature form")) {
         Snprintf(outmain, sizeof outmain, "怪物の姿から戻れずに倒れた");
     } else if (!strcmpi(core, "unsuccessful polymorph")) {
-        Snprintf(outmain, sizeof outmain, "変身の失敗で倒れた");
+        Snprintf(outmain, sizeof outmain, "へんげの失敗で倒された");
     } else if (!strcmpi(core, "self-genocide")) {
-        Snprintf(outmain, sizeof outmain, "自分自身の抹殺");
+        Snprintf(outmain, sizeof outmain, "自分自身の虐殺");
     } else if (!strcmpi(core, "system shock")) {
         Snprintf(outmain, sizeof outmain, "システムショック");
     } else if (!strcmpi(core, "alchemic blast")) {
@@ -941,7 +976,7 @@ jp_translate_killer_text_for_display(
     } else if (!strcmpi(core, "residual undead turning effect")) {
         Snprintf(outmain, sizeof outmain, "アンデッド退散の残留効果");
     } else if (!strcmpi(core, "genocidal confusion")) {
-        Snprintf(outmain, sizeof outmain, "抹殺による混乱");
+        Snprintf(outmain, sizeof outmain, "虐殺による混乱");
     } else if (!strcmpi(core, "imperious order")) {
         Snprintf(outmain, sizeof outmain, "傲慢な命令");
     } else if (!strcmpi(core, "removing gloves")) {
@@ -1010,6 +1045,8 @@ jp_translate_killer_text_for_display(
         Snprintf(outmain, sizeof outmain, "窒息");
     } else if (!strcmpi(core, "quit while already on Charon's boat")) {
         Snprintf(outmain, sizeof outmain, "カロンの舟の上で人生を諦めた");
+    } else if (!strncmpi(core, "teleported out of the dungeon and fell to ", 42)) {
+        Snprintf(outmain, sizeof outmain, "ダンジョン外へテレポートして落下死した");
     } else if (!strncmp(core, "unwisely ate the body of ", 25)) {
         const char *mname = skip_english_article(core + 25);
         int mndx, gend;
