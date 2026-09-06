@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-03. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-06. */
 /* NetHack 5.0	options.c	$NHDT-Date: 1778886716 2026/05/15 15:11:56 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.782 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Michael Allison, 2008. */
@@ -2619,6 +2619,7 @@ optfn_name(
                 return optn_ok;
 #endif
             nmcpy(svp.plname, op, PL_NSIZ);
+            iflags.plname_from_os = FALSE;
         } else
             return optn_err;
         return optn_ok;

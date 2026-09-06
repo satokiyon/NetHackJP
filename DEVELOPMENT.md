@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-04. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-06. -->
 <!--
   IMPORTANT POLICY FOR NetHackJP-ONLY MODIFICATIONS
   =================================================
@@ -194,7 +194,11 @@ X11 版では getlin / askname ダイアログ（`#名前`、`#願い`、`#虐�
    （`xim_init()` は `C`/`POSIX` ロケール時に `C.UTF-8` へのフォールバックを試みるため、`ja_JP.UTF-8` が未生成でも `C.UTF-8` が利用可能であれば動作します）
 3. fcitx5 の起動（nethack を起動する **同じシェル／セッション** で実行）:
    ```bash
-   fcitx5 -d &
+   # WSL (WSLg) の場合は Wayland との競合を防ぐため以下で起動:
+   fcitx5 --disable=wayland,waylandim -d
+   # 通常の Linux X11 の場合:
+   # fcitx5 -d
+
    pgrep -a fcitx5   # 起動確認
    ```
 4. X11 版の起動と確認:
@@ -202,7 +206,7 @@ X11 版では getlin / askname ダイアログ（`#名前`、`#願い`、`#虐�
    XAPPLRESDIR=./playground ./playground/nethack -wX11
    ```
    - stderr に `XIM: connected to input method` と出力されれば fcitx5 との接続成功。
-   - `XIM: XOpenIM failed` と出た場合は `pgrep -a fcitx5` と `echo $XMODIFIERS` を確認し、**新しいターミナルで nethack を起動してください**（既存ターミナルには環境変数の変更が反映されません）。fcitx5 未起動時でも ASCII 入力は動作します。
+   - `XIM: XOpenIM failed` と出た場合は `pgrep -a fcitx5` と `echo $XMODIFIERS` を確認し、`fcitx5-diagnose` で問題箇所を切り分けてください。また、**新しいターミナルで nethack を起動してください**（既存ターミナルには環境変数の変更が反映されません）。fcitx5 未起動時でも ASCII 入力は動作します。
 5. 入力の切替: ダイアログ内で **Ctrl+Space** で日本語入力モードをトグルします。確定は Enter / Space で、確定文字列が入力欄に挿入されダイアログは閉じないため、もう一度 Enter で OK します（詳細は §4.12）。
 6. IM を無効化したい場合は `~/.nethackrc` に `OPTIONS=use_xim:off` を指定します（デフォルトは on）。
 
@@ -232,7 +236,7 @@ make install
 # (5) 日本語入力の準備（X11 版で日本語入力する場合のみ）
 export LANG=ja_JP.UTF-8
 export XMODIFIERS=@im=fcitx
-fcitx5 -d &
+fcitx5 --disable=wayland,waylandim -d
 
 # (6) 起動
 playground/nethack                                   # tty インターフェース
@@ -512,18 +516,25 @@ WSL環境などの X11 ポート (`-wX11`) において、`XtNinternational = Tr
   1. **`win/X11/dialogs.c`**: `SetDialogResponse()` 内の `XFontStruct *font` を NULL 初期化し、フォールバック幅計算を追加。
   2. **`win/X11/winstat.c`**: `create_status_window_fancy()` および `display_status_line()` 内の `fs` / `font` を NULL 初期化し、ガードを追加。
   3. **`win/X11/winX.c`**: `set_bold_font()`、`nhFontHeight()` 内の `fs` を NULL 初期化し、`yn_font` の `XTextWidth` 呼び出しに NULL ガードを追加。
-### 10. UNIX/Linux 環境における起動時キャラクター名入力のデフォルト化 (`GENERICUSERS=*`)
-WSL や Linux 環境において、NetHack 起動時に Linux のログインユーザー名（`$USER`）が自動でキャラクター名として確定されてしまうのを防ぎ、ゲーム開始時に常にキャラクター名入力プロンプト（「お名前は？」）を表示できるようにするための設定です。
-* **マーカータグ**: `# NetHackJP: prompt for character name on startup instead of using Linux username`
+### 10. UNIX/Linux 環境における起動時キャラクター名入力のデフォルト化 (`GENERICUSERS=*`) と二重入力防止
+WSL や Linux 環境において、NetHack 起動時に Linux のログインユーザー名（`$USER`）が自動でキャラクター名として確定されてしまうのを防ぎ、ゲーム開始時に常にキャラクター名入力プロンプト（「お名前は？」）を表示できるようにするための設定、およびそれに伴う二重入力防止ガードです。
+* **マーカータグ**: 
+  - `# NetHackJP: prompt for character name on startup instead of using Linux username`
+  - `/* NetHackJP: do not clear explicitly given, user-entered, or restored hero name under genericusers */`
+  - `/* NetHackJP: track if svp.plname came from OS login name */`
 * **対象ファイル**:
   1. **`sys/unix/sysconf`**: `GENERICUSERS` のデフォルト値を `*` に変更。
   2. **`sys/libnh/sysconf`**: `GENERICUSERS` のデフォルト値を `*` に変更。
   3. **`playground/sysconf`**: `GENERICUSERS` のデフォルト値を `*` に変更。
+  4. **`include/flag.h`**: `struct instance_flags` に `plname_from_os` フラグを追加。
+  5. **`src/role.c`**: `plnamesuffix()` 内で `sysopt.genericusers && iflags.plname_from_os` の場合のみ名前クリアを実行し、クリア後はフラグを解除。`select_saved_game()` でセーブ復元時にもフラグを解除。
+  6. **`src/options.c`**: `optfn_name()` で `OPTIONS=name:` 指定時にフラグを解除。
+  7. **`sys/unix/unixmain.c` / `sys/libnh/libnhmain.c`**: `whoami()` で OS ログイン名を取得・設定した時のみ `iflags.plname_from_os = TRUE` を設定。`-u` コマンドライン引数指定時は解除。
 * **動作仕様**:
-  - `GENERICUSERS=*` が指定されている場合、`src/role.c` の `plnamesuffix()` にて `svp.plname` がクリアされ、ゲーム開始時に必ず `askname()`（名前入力プロンプト）が実行されます。
-  - コマンドライン引数 `-u <名前>` や `OPTIONS=name:<名前>` が指定された場合はそちらが優先されます。
+  - `GENERICUSERS=*` が指定されている場合、`whoami()` で OS ログイン名から自動設定された初期状態（`iflags.plname_from_os == TRUE`）においてのみ `src/role.c` の `plnamesuffix()` にて `svp.plname` がクリアされ、ゲーム開始時に必ず `askname()`（名前入力プロンプト/ダイアログ）が実行されます。
+  - コマンドライン引数 `-u <名前>` や `OPTIONS=name:<名前>` が指定された場合、ユーザーが `askname()` で名前を入力した場合、およびセーブデータから復元された場合は `iflags.plname_from_os` が FALSE となるため、キャラクター選択後（`newgame()` -> `role_init()`）やセーブ復元後（`dorecover()` -> `role_init()`）に再度名前が消去されて二重に入力を求められる不具合を完全に防止します。
 * **アップストリーム追従手順**:
-  - アップストリームで `sysconf` のマージ競合が生じた場合は、`GENERICUSERS=*` の設定を維持してください。
+  - アップストリームで `plnamesuffix()` や `sysconf` のマージ競合が生じた場合は、本設定および `iflags.plname_from_os` によるガードを維持してください。
 
 ### 11. Linux/WSL X11 GUI ポートにおける XIM インプットメソッド対応
 本リポジトリの X11 ポートは上流 NetHack 5.0 には XIM（X Input Method）対応が含まれていません。fcitx5 / ibus / IIIMF 等の IM サーバと通信して日本語入力を行うための独自拡張です。詳細はルートの `XIM-IMPLEMENTATION-PLAN.md` を参照。

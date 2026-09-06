@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-05. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-06. -->
 # NetHack 5.0 日本語化非公式プロジェクト
 
 NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.nethack.org/)5.0 を日本語で快適にプレイできるようにすることを目的とした非公式プロジェクトです。(対象OSはWindowsとUbuntu(WSL)のみ)
@@ -77,14 +77,17 @@ WSL / Linux で X11 版（`./nethackW`）を起動し、`#名前` `#記念碑` `
 
 1. **fcitx5 環境**（Ubuntu / Debian 系の現行デフォルト）の場合:
    ```bash
-   sudo apt install fcitx5 fcitx5-frontend-gtk3 fcitx5-modules
+   sudo apt install -y fcitx5 fcitx5-modules fcitx5-mozc fcitx5-frontend-gtk3
    # ~/.bashrc に追加（ログインシェルでも確実に効くよう ~/.profile にも）
    export GTK_IM_MODULE=fcitx
    export QT_IM_MODULE=fcitx
    export XMODIFIERS=@im=fcitx
    export SDL_IM_MODULE=fcitx
-   fcitx5 -d
-   # WLSの場合は fcitx5 --disable=wayland -d
+
+   # WSL (WSLg) の場合は Wayland との競合を防ぐため以下で起動:
+   fcitx5 --disable=wayland,waylandim -d
+   # 通常の Linux X11 の場合:
+   # fcitx5 -d
    ```
 2. **ibus 環境**（従来の Ubuntu）:
    ```bash

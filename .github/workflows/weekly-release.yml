@@ -1,4 +1,4 @@
-# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-05.
+# Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-06.
 name: Weekly Release
 
 on:
@@ -108,6 +108,11 @@ jobs:
             echo 'export HACKDIR="$SCRIPT_DIR"'
             echo 'export NETHACKDIR="$SCRIPT_DIR"'
             echo 'export XAPPLRESDIR="$SCRIPT_DIR"'
+            echo '[ -z "$XMODIFIERS" ] && export XMODIFIERS="@im=fcitx"'
+            echo 'if ! pgrep -a fcitx5 >/dev/null 2>&1 && ! pgrep -a fcitx >/dev/null 2>&1; then'
+            echo '  echo "注意: fcitx5 が起動していません。GUIダイアログで日本語入力を行う場合は、" >&2'
+            echo '  echo "      事前に \"fcitx5 --disable=wayland,waylandim -d\" を実行してください。" >&2'
+            echo 'fi'
             echo 'exec "$SCRIPT_DIR/nethack.bin" -wX11 -bg black -fg white -bd white "$@"'
           } > nethackW
 

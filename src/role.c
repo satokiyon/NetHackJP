@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-08-25. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-06. */
 /* NetHack 5.0	role.c	$NHDT-Date: 1781973065 2026/06/20 16:31:05 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.111 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985-1999. */
 /*-Copyright (c) Robert Patrick Rankin, 2012. */
@@ -1871,7 +1871,8 @@ plnamesuffix(void)
 #endif
 
     /* some generic user names will be ignored in favor of prompting */
-    if (sysopt.genericusers) {
+    /* NetHackJP: do not clear explicitly given, user-entered, or restored hero name under genericusers */
+    if (sysopt.genericusers && iflags.plname_from_os) {
         if (*sysopt.genericusers == '*') {
             svp.plname[0] = '\0';
         } else {
@@ -1886,8 +1887,10 @@ plnamesuffix(void)
                 /* it's generic; remove it so that askname() will be called */
                 svp.plname[0] = '\0';
         }
-        if (!svp.plname[0])
+        if (!svp.plname[0]) {
             gp.plnamelen = 0;
+            iflags.plname_from_os = FALSE;
+        }
     }
 
     do {
@@ -1909,6 +1912,7 @@ plnamesuffix(void)
                if so, it contains "name-role-race-gender-alignment" */
             gp.plnamelen = 0;
             if (svp.plname[0] && !iflags.defer_plname) {
+                iflags.plname_from_os = FALSE;
                 /* check if we have a dash after the name part */
                 char *p = strchr(svp.plname, '-');
                 if (p) {
@@ -1998,6 +2002,7 @@ select_saved_game(const char *buffer)
     (void) memcpy(svp.plname, buffer, namelen);
     svp.plname[namelen] = '\0';
     gp.plnamelen = 0; /* svp.plname からサフィックスを除去したため */
+    iflags.plname_from_os = FALSE;
 
     /* 49バイトのヘッダ領域全体をスキャンして、属性サフィックスを探す。
        ハイフン区切り（ Name-Role... ）と NUL 区切り（ Name\0-Role... ）の両方に対応 */
