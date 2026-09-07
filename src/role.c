@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-06. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-08. */
 /* NetHack 5.0	role.c	$NHDT-Date: 1781973065 2026/06/20 16:31:05 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.111 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985-1999. */
 /*-Copyright (c) Robert Patrick Rankin, 2012. */
@@ -1962,10 +1962,11 @@ plnamesuffix(void)
             if (new_len < old_len || buffer_overflow || encoded_len > max_encoded) {
                 pline("名前が長すぎます。ファイル名の制限により保存できません。");
 #if defined(WIN32)
-                pline("半角英数字なら %d 文字、日本語なら約 %d 文字以内で入力してください。",
-                      PL_NSIZ -1, (PL_NSIZ -1) / 3);
+                pline("半角英数字なら %d 文字、日本語なら約 %d 文字（絵文字は約 %d 文字）以内で入力してください。",
+                      PL_NSIZ - 1, (PL_NSIZ - 1) / 3, (PL_NSIZ - 1) / 4);
 #else
-                pline(" %d 文字以内で入力してください。", max_encoded);
+                pline("半角英数字なら %d 文字、日本語なら約 %d 文字（絵文字は約 %d 文字）以内で入力してください。",
+                      max_encoded, max_encoded / 3, max_encoded / 4);
 #endif
                 wait_synch();
                 svp.plname[0] = '\0';

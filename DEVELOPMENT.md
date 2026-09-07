@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-06. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-08. -->
 <!--
   IMPORTANT POLICY FOR NetHackJP-ONLY MODIFICATIONS
   =================================================
@@ -598,6 +598,43 @@ Xaw AsciiText の `XtNinternational=True` は WSLg/XWayland + fcitx5 構成で I
 * **対応ファイル**: `win/X11/wingetlin.c`、`win/X11/winxim.c`、`win/X11/winlabel.c`、`win/X11/winX.c`、`win/X11/winmap.c`、`include/winX.h`
 * **削除手順**: `wingetlin.c` / `winxim.c` 自体が独自実装であるため、アップストリームへ戻す場合はファイルごと削除し、`Makefile.src` / `linux-jp` のエントリ、`nh_XtPopdown` の `XimDialogReleaseInputFocus()` 呼び出し、winmap.c の注釈コメント、winX.h の追加宣言を取り消す。`X11_label_string_width` のみ winlabel.c 内の独立追加のため単独で取り消し可能。
 * **アップストリーム追従手順**: 上流 NetHack-5.0 に XIM 対応（XFilterEvent を含む IM 統合、または `XtNinternational` ベースの実装）が導入された場合、`wingetlin.c` / `winxim.c` を削除して上流設計に全面的に追従する。`X11_label_string_width` は上流に同等の測定 API が追加された場合はそちらへ移行する。
+
+### 13. Windows コンソール（WIN32CON）における絵文字（4バイトUTF-8）のサロゲートペア対応
+
+* **背景**:
+  Windows コンソール（WIN32CON）の `utf8_char_chartype()` / `utf8_char_display_width()`（`win/tty/wintty.c`）および `getlin_utf8_char_chartype()` / `getlin_utf8_char_display_width()`（`win/tty/getline.c`）において、`MultiByteToWideChar()` に渡す出力バッファ長が `1` に固定されていたため、サロゲートペア（UTF-16 で 2 つの `wchar_t` を要する 4 バイト絵文字や SMP 補助漢字）の変換時にバッファ不足エラー（戻り値 0）となり、文字種別判定が失敗して表示幅が 1（半角）と誤認される問題があった。これにより、画面上の絵文字のバックスペース消去幅計算（`delcols`）が狂い、消去残骸が発生していた。
+* **修正内容**:
+  1. `win/tty/getline.c` および `win/tty/wintty.c` の各関数において、`MultiByteToWideChar()` の出力バッファ長を `2` に拡張。
+  2. 戻り値が `2`（サロゲートペア）の場合、`GetStringTypeW()` で分類フラグを取得しつつ、絵文字・追加漢字として全角幅（2 セル幅、`NH_C3_FULLWIDTH`）を付与して幅 2 を返すように実装。
+  3. `win/tty/wintty.c` の `tty_askname()` において、WIN32CON 以外の POSIX 環境で `tgetch()` から受領した生バイト列が `unicodeval_to_utf8str()` に二重エンコードされるのを防ぐため、`#ifdef WIN32CON` の条件分岐を整備。
+  4. `src/role.c` において、名前が 31 バイトを超過した際の警告メッセージに、4 バイト絵文字の場合の目安文字数（約 7 文字）を併記。
+* **マーカータグ**:
+  - `/* NetHackJP: MultiByteToWideChar buffer expanded to 2 for surrogate pair support */`
+  - `/* NetHackJP: Surrogate pairs (emoji and SMP supplementary ideographs) treated as fullwidth */`
+  - `/* NetHackJP: POSIX / Linux: tgetch() returns raw bytes of incoming UTF-8 */`
+* **アップストリーム追従手順**:
+  上流 NetHack-5.0 で Windows コンソールの UTF-8/サロゲートペア入力および文字幅判定が改善された場合、本独自修正と競合箇所の差分を確認し、上流の実装へ追従する。
+
+### 14. フルーツ名バッファ（`PL_FSIZ`）の 64 バイト拡張と重複時プレフィックスの日本語化
+
+* **背景**:
+  プレイヤーが設定したフルーツ名（`svp.pl_fruit`）が他の既存食料名や特定接頭辞と重複した際、NetHack は区別のために `"candied "`（8 バイト）を自動付加する。しかし日本語環境において以下の問題があった。
+  1. 既存食料名「フォーチュンクッキー」（30 バイト）等に日本語プレフィックス「砂糖漬けの」（15 バイト）を付加すると合計 45 バイトとなり、従来の `PL_FSIZ`（32 バイト、有効 31 バイト）では 14 バイト不足して途中で切断されてしまう（全 33 種中 12 種の食料名で 31 バイトを超過）。
+  2. `nmcpy()` による単純バイトコピーのため、日本語や絵文字が境界にあるとマルチバイトの途中バイトで切断され文字化けが発生する。
+  3. 付加されるプレフィックスが英語（`"candied "`）のままハードコードされており、ゲーム内画面で「candied りんご」のように英語交じりで表示される。
+* **修正内容**:
+  1. `include/global.h` の `PL_FSIZ` を 32 から 64（有効長 63 バイト）に拡張。これにより「砂糖漬けのフォーチュンクッキー」（45 バイト）でも 18 バイトの余裕を持って完全に格納可能となった。
+  2. `src/options.c` の `fruitadd()` において、`jp_item_name(i)` を比較対象に追加し、日本語食料名（「りんご」「卵」等）との重複も正しく検知できるように拡張。
+  3. 重複時に付加するプレフィックスを、マルチバイト文字を含む場合は自然な日本語である `"砂糖漬けの"`、半角英数字のみの場合は `"candied "` に切り分けるよう実装。
+  4. プレフィックス付加後に `utf8_truncate(svp.pl_fruit, PL_FSIZ - 1)` を適用し、バッファ上限を超えた場合でも必ず安全な UTF-8 文字境界で切り詰められるように保護。
+* **マーカータグ**:
+  - `/* NetHackJP: expand PL_FSIZ from 32 to 64 for Japanese fruit names with "砂糖漬けの" prefix */`
+  - `/* NetHackJP: Also check Japanese food item names to detect collisions */`
+  - `/* NetHackJP: Use natural Japanese prefix "砂糖漬けの" for multibyte fruit names */`
+  - `/* NetHackJP: copy remaining text safely and truncate at UTF-8 boundary */`
+* **対応ファイル**: `include/global.h`、`src/options.c`
+* **アップストリーム追従手順**:
+  上流 NetHack-5.0 で `PL_FSIZ` の拡張やフルーツ名重複判定の変更が入った場合、本独自拡張の差分（64 拡張と日本語プレフィックス処理）を維持しつつ追従する。
 
 ---
 
