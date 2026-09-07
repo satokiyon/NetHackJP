@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-07-31. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-08. */
 /* NetHack 5.0	hack.h	$NHDT-Date: 1781973080 2026/06/20 16:31:20 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.299 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Pasi Kallinen, 2017. */
@@ -1019,6 +1019,8 @@ struct nh_file {
     FILE *fpdebug;        /* file pointer debug info */
     struct fieldlevel_content style;
     struct nh_file *nhfpconvert;
+    int fruit_struct_size;
+    int fruit_name_size;
 };
 
 typedef struct nh_file NHFILE;

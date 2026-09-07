@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-08-27. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-08. */
 /* NetHack 5.0	version.c	$NHDT-Date: 1781973072 2026/06/20 16:31:12 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.118 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Michael Allison, 2018. */
@@ -794,6 +794,13 @@ compare_critical_bytes(NHFILE *nhfp, int *idx_1st_mismatch, unsigned long utdfla
         }
 #endif
         if (cscbuf[i] != critical_sizes[i].ucsize) {
+            /* 旧バージョン（PL_FSIZ=32）で保存されたセーブデータの自動マイグレーション */
+            if (!strcmp(critical_sizes[i].nm, "struct fruit")
+                && cscbuf[i] == (uchar) (critical_sizes[i].ucsize - 32)) {
+                nhfp->fruit_struct_size = (int) cscbuf[i];
+                nhfp->fruit_name_size = 32;
+                continue;
+            }
             const char *dm = datamodel(0), *dmfile;
 
             dmfile = what_datamodel_is_this(0,
