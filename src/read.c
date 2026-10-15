@@ -2870,6 +2870,7 @@ do_class_genocide(void)
                        ? "記号かクラスを表す名前、または'?'を入力してください"
                        : "'?'で以前の虐殺を確認できます");
         getlin(promptbuf, buf);
+        jp_normalize_zenkaku(buf);
         (void) mungspaces(buf);
         /* avoid 'that does not represent any monster' for empty input */
         if (!*buf) {
@@ -3073,6 +3074,7 @@ do_genocide(
                            ? "モンスターの種類名、または'?'を入力してください"
                            : "'?'で以前の虐殺を確認できます");
             getlin(promptbuf, buf);
+            jp_normalize_zenkaku(buf);
             (void) mungspaces(buf);
             /* avoid 'such creatures do not exist' for empty input */
             if (!*buf) {

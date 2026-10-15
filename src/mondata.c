@@ -1204,25 +1204,30 @@ jp_normalize_zenkaku(char *str)
         return;
 
     while (*p) {
-        /* 全角スペース U+3000 (0xE3 0x80 0x80) */
-        if (p[0] == 0xE3 && p[1] == 0x80 && p[2] == 0x80) {
-            *q++ = ' ';
-            p += 3;
+        /* 3バイトUTF-8の境界保護: p[1] と p[2] が存在することを確認 */
+        if (p[1] != '\0' && p[2] != '\0') {
+            /* 全角スペース U+3000 (0xE3 0x80 0x80) */
+            if (p[0] == 0xE3 && p[1] == 0x80 && p[2] == 0x80) {
+                *q++ = ' ';
+                p += 3;
+                continue;
+            }
+            /* 全角！〜／ U+FF01〜U+FF0F (0xEF 0xBC 0x81〜0x8F) => '!'〜'/' (0x21〜0x2F)
+             * 全角０〜９ U+FF10〜U+FF19 (0xEF 0xBC 0x90〜0x99) => '0'〜'9' (0x30〜0x39)
+             * 全角：〜＠ U+FF1A〜U+FF20 (0xEF 0xBC 0x9A〜0xBF) => ':'〜'@' (0x3A〜0x5F) */
+            else if (p[0] == 0xEF && p[1] == 0xBC && (p[2] >= 0x81 && p[2] <= 0xBF)) {
+                *q++ = (char) (p[2] - 0x60);
+                p += 3;
+                continue;
+            }
+            /* 全角｀〜～ U+FF40〜U+FF5E (0xEF 0xBD 0x80〜0x9E) => '`'〜'~' (0x60〜0x7E) */
+            else if (p[0] == 0xEF && p[1] == 0xBD && (p[2] >= 0x80 && p[2] <= 0x9E)) {
+                *q++ = (char) (p[2] - 0x20);
+                p += 3;
+                continue;
+            }
         }
-        /* 全角！〜／ U+FF01〜U+FF0F (0xEF 0xBC 0x81〜0x8F) => '!'〜'/' (0x21〜0x2F)
-         * 全角０〜９ U+FF10〜U+FF19 (0xEF 0xBC 0x90〜0x99) => '0'〜'9' (0x30〜0x39)
-         * 全角：〜＠ U+FF1A〜U+FF20 (0xEF 0xBC 0x9A〜0xBF) => ':'〜'@' (0x3A〜0x5F) */
-        else if (p[0] == 0xEF && p[1] == 0xBC && (p[2] >= 0x81 && p[2] <= 0xBF)) {
-            *q++ = (char) (p[2] - 0x60);
-            p += 3;
-        }
-        /* 全角｀〜～ U+FF40〜U+FF5E (0xEF 0xBD 0x80〜0x9E) => '`'〜'~' (0x60〜0x7E) */
-        else if (p[0] == 0xEF && p[1] == 0xBD && (p[2] >= 0x80 && p[2] <= 0x9E)) {
-            *q++ = (char) (p[2] - 0x20);
-            p += 3;
-        } else {
-            *q++ = (char) *p++;
-        }
+        *q++ = (char) *p++;
     }
     *q = '\0';
 }
