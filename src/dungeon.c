@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-09-24. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-15. */
 /* NetHack 5.0	dungeon.c	$NHDT-Date: 1781973047 2026/06/20 16:30:47 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.239 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2012. */
@@ -2120,6 +2120,63 @@ lev_by_name(const char *nam)
         dlev = mseen->lev;
     } else {
         /* no matching annotation, check whether they used a name we know */
+        char zbuf[BUFSZ];
+
+        Strcpy(zbuf, nam);
+        jp_normalize_zenkaku(zbuf);
+        nam = zbuf;
+
+        /* ゲーム内階層名（#chronicle / #overview等）の日本語マッピング */
+        {
+            static const struct {
+                const char *jp_name;
+                const char *en_key;
+            } jp_level_map[] = {
+                { "ノームの鉱山", "The Gnomish Mines" },
+                { "ノーム鉱山", "The Gnomish Mines" },
+                { "鉱山", "The Gnomish Mines" },
+                { "運命の大迷宮", "The Dungeons of Doom" },
+                { "大迷宮", "The Dungeons of Doom" },
+                { "倉庫番", "Sokoban" },
+                { "ソコバン", "Sokoban" },
+                { "クエスト", "The Quest" },
+                { "ローディオス砦", "Fort Ludios" },
+                { "フォート・ノックス", "Fort Ludios" },
+                { "フォートノックス", "Fort Ludios" },
+                { "ノックス", "Fort Ludios" },
+                { "ゲヘナ", "gehennom" },
+                { "ヴラド侯の塔", "Vlad's Tower" },
+                { "ヴラドの塔", "Vlad's Tower" },
+                { "精霊界", "The Elemental Planes" },
+                { "モーロックの聖域", "sanctum" },
+                { "聖域", "sanctum" },
+                { "神託所", "oracle" },
+                { "デルフィ", "oracle" },
+                { "デルファイ", "oracle" },
+                { "迷宮の城", "castle" },
+                { "城", "castle" },
+                { "死の谷", "valley" },
+                { "魔法使いの塔", "wiz1" },
+                { "アストラル界", "astral" },
+                { "大地の精霊界", "earth" },
+                { "土の界", "earth" },
+                { "風の精霊界", "air" },
+                { "空の界", "air" },
+                { "火の精霊界", "fire" },
+                { "火の界", "fire" },
+                { "水の精霊界", "water" },
+                { "水の界", "water" },
+                { (const char *) 0, (const char *) 0 }
+            };
+            int m_idx;
+
+            for (m_idx = 0; jp_level_map[m_idx].jp_name; ++m_idx) {
+                if (!strcmpi(nam, jp_level_map[m_idx].jp_name)) {
+                    nam = jp_level_map[m_idx].en_key;
+                    break;
+                }
+            }
+        }
 
         /* allow strings like "the oracle level" to find "oracle" */
         if (!strncmpi(nam, "the ", 4))
