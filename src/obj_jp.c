@@ -188,7 +188,7 @@ const char *const obj_jp_names[NUM_OBJECTS + 1] = {
     [MAGIC_FLUTE] = "魔法のフルート",
     [MAGIC_HARP] = "魔法の竪琴",
     [MAGIC_LAMP] = "魔法のランプ",
-    [MAGIC_MARKER] = "魔法のマーカ",
+    [MAGIC_MARKER] = "魔法のマーカー",
     [MAGIC_WHISTLE] = "魔法の笛",
     [MEAT_RING] = "肉の輪",
     [MEAT_STICK] = "肉の串",
@@ -1118,7 +1118,7 @@ static const struct jnh_wish_alias jnh_wish_aliases[] = {
     { "万能鍵", "万能鍵" },
     { "鍵開け器具", "鍵開け器具" },
     { "クレジットカード", "クレジットカード" },
-    { "魔法のマーカー", "魔法のマーカ" },
+    { "魔法のマーカ", "魔法のマーカー" },
     { "缶詰作成キット", "缶詰作成道具" },
 
     /* アーティファクト */
