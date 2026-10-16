@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-16. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-17. -->
 # NetHack 5.0 日本語化非公式プロジェクト
 
 NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.nethack.org/)5.0 を日本語で快適にプレイできるようにすることを目的とした非公式プロジェクトです。(対象OSはWindowsとUbuntu(WSL)のみ)
@@ -290,7 +290,7 @@ OPTIONS=align_status:right,msw_stat_cols:15
 * [hackaholic](https://nethack.go5.jp/): 通称「墓堀」
 * [NetHack Wiki](https://nethackwiki.com/wiki/Main_Page)
 * [NetHack Spoilers](https://davidbau.github.io/nethack-companion/spoilers/)
-* [NetHack Spoilers日本語訳](https://satokiyon.github.io/nethack-companion-jp/spoilers/index.ja.html)
+* [NetHack Spoilers日本語訳](https://satokiyon.github.io/nethack-companion-jp/spoilers/index.jp.html)
 * ...他にも見つけたら追記する
 ----
 
