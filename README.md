@@ -1,7 +1,7 @@
 <!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-19. -->
 # NetHack 5.0 (非公式)日本語化プロジェクト
 
-NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.nethack.org/)5.0 を日本語で快適にプレイできるようにすることを目的とした非公式プロジェクトです。(対象OSはWindowsとUbuntu(WSL)のみ)
+NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.nethack.org/)5.0 を日本語で快適にプレイできるようにすることを目的とした非公式プロジェクトです。(対象OSはWindowsとLinuxのみ)
 
 ## スクリーンショット
 <figure>
