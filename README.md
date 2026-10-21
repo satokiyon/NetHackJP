@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-19. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-21. -->
 # NetHack 5.0 (非公式)日本語化プロジェクト
 
 NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.nethack.org/)5.0 を日本語で快適にプレイできるようにすることを目的とした非公式プロジェクトです。(対象OSはWindowsとLinuxのみ)
@@ -301,6 +301,11 @@ OPTIONS=align_status:right,msw_stat_cols:15
 * [BALROG](https://balrogai.com/): LLMとVLMの長期タスクの性能をNetHackでベンチマークするプロジェクト
 * [NetHackers](https://nethackers.dunnolab.ai/): NetHack 3.6.6を昇天できるボットを作ろうというプロジェクト
 * …他にも見つけたら追記する
+
+## その他の面白そうなNetHack
+* [NetHack-3D](https://github.com/JamesIV4/nethack-3d): リッチなUIの2D/3Dだけでなく1人称視点でもNetHackが遊べる。VRデバイス(Meta Quest)でも遊べる。
+* [VoxHack](https://github.com/MrEveryDay98/VoxHack): マインクラフト風のボクセルワールドを探検するような感覚でNetHackが遊べる。
+* [NetHack Tiles Client](https://github.com/statico/nethack-tiles-client): 公開サーバやローカルサーバにssh接続してタイルセットでNetHackを遊べるクライアント。
 
 ----
 
