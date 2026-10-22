@@ -5879,7 +5879,7 @@ untrap_box(
     boolean confused)
 {
     if (box->tknown && !box->otrapped) {
-        You("know %s is not trapped.", the(xname(box)));
+        You("その%sには罠がないことを知っている.", xname(box));
         return;
     }
 
