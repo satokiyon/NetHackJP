@@ -1,4 +1,4 @@
--- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-02.
+-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-22.
 -- NetHack Tourist Tou-loca.lua	$NHDT-Date: 1781994874 2026/06/20 22:34:34 $  $NHDT-Branch: NetHack-5.0 $:$NHDT-Revision: 1.4 $
 --	Copyright (c) 1989 by Jean-Christophe Collet
 --	Copyright (c) 1991,92 by M. Stephenson, P. Winner
@@ -164,7 +164,7 @@ if percent(10) then
 end
 if percent(10) then
 	des.monster({id="wizard", name="Ridcully", male=1, peaceful=1, keep_default_invent=false})
-end=
+end
 if percent(10) then
 	des.monster({id="wizard", name="the Bursar", male=1, peaceful=1, keep_default_invent=false})
 end
