@@ -1,6 +1,6 @@
 # A Guide to the Mazes of Menace (Guidebook)
 
-NOTICE: Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-23.
+NOTICE: Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-24.
 
 **A Guide to the Mazes of Menace (Guidebook for NetHack)**
 
@@ -111,21 +111,21 @@ In order to understand what is going on  in  NetHack,  first  you
 <summary>Show text version (ASCII art)</summary>
 
 ```text
-        +---------------------------------------------------------------+
-        |The bat bites!                                                 |
-        |                                                               |
-        |    ------                                                     |
-        |    |....|    ----------                                       |
-        |    |.<..|####...@...$.|                                       |
-        |    |....-#   |...B....+                                       |
-        |    |....|    |.d......|                                       |
-        |    ------    -------|--                                       |
-        |                                                               |
-        |                                                               |
-        |                                                               |
-        |Player the Rambler   St:12 Dx:7 Co:18 In:11 Wi:9 Ch:15 Neutral |
-        |Dlvl:1 $:993 HP:9(12) Pw:3(3) AC:10 Exp:1/19 T:752 Hungry Conf |
-        +---------------------------Figure-1----------------------------+
++---------------------------------------------------------------+
+|The bat bites!                                                 |
+|                                                               |
+|    ------                                                     |
+|    |....|    ----------                                       |
+|    |.<..|####...@...$.|                                       |
+|    |....-#   |...B....+                                       |
+|    |....|    |.d......|                                       |
+|    ------    -------|--                                       |
+|                                                               |
+|                                                               |
+|                                                               |
+|Player the Rambler   St:12 Dx:7 Co:18 In:11 Wi:9 Ch:15 Neutral |
+|Dlvl:1 $:993 HP:9(12) Pw:3(3) AC:10 Exp:1/19 T:752 Hungry Conf |
++---------------------------Figure-1----------------------------+
 ```
 </details>
 
@@ -135,11 +135,11 @@ In order to understand what is going on  in  NetHack,  first  you
 <summary>Show text version (ASCII art)</summary>
 
 ```text
-        +---------------------------------------------------------------+
-        |Player the Rambler   St:12 Dx:7 Co:18 In:11 Wi:9 Ch:15         |
-        |Neutral $:993 HP:9(12) Pw:3(3) AC:10 Exp:1/19 Hungry           |
-        |Dlvl:1 T:752                                  Conf             |
-        +---------------------------Figure-2----------------------------+
++---------------------------------------------------------------+
+|Player the Rambler   St:12 Dx:7 Co:18 In:11 Wi:9 Ch:15         |
+|Neutral $:993 HP:9(12) Pw:3(3) AC:10 Exp:1/19 Hungry           |
+|Dlvl:1 T:752                                  Conf             |
++---------------------------Figure-2----------------------------+
 ```
 </details>
 
