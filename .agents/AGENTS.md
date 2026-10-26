@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-21. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-26. -->
 # NetHackJP 開発ルール
 
 ## イベント履歴（livelog）および画面メッセージの日本語表示方針
@@ -176,6 +176,22 @@
 
 5. **アイテム名・モンスター名の表記更新時における願いエイリアス（後方互換性）の二重保証**:
    - 長音表記の変更（例: 「魔法のマーカ」➔「魔法のマーカー」）や定訳の現代化を行う際は、表示用配列（`obj_jp_names` や `mon_jp_name`）を変更するだけでなく、プレイヤーが過去の習慣や旧表記で入力しても願い（Wishing）が確実に通るよう、`src/obj_jp.c` の願いエイリアステーブル（`jnh_wish_aliases[]`）に旧表記から新表記へのマッピング（例: `{ "魔法のマーカ", "魔法のマーカー" }`）を必ず追加してください。
+
+## TTY UI（Windows CON / POSIX）における文字出力の抽象化（g_putch / g_pututf8）徹底方針
+
+1. **生の `putchar()` / `fputs(..., stdout)` による直接出力の禁止**:
+   - `win/tty/`（特に `wintty.c` のテキストウィンドウ、メニュー、ステータス、マップ等の描画処理）において、標準 C の `putchar()` や `fputs(..., stdout)` を直接呼び出して文字を出力してはなりません。
+   - Windows コンソール（`WIN32CON`）環境では、初期状態（`.nethackrc` なし）のコードページが CP437 のまま動作するため、生出力された UTF-8 バイト列は CP437 文字として解釈されて完全に文字化けします。また、`consoletty.c` の仮想バックバッファ管理もバイパスされてしまいます。
+
+2. **プラットフォーム共通の出力抽象化関数への一本化**:
+   - 1文字または文字シーケンスを出力する際は、必ず以下の抽象化関数を経由してください：
+     - ASCII 文字（`< 0x80`）: `g_putch((int) c)`
+     - マルチバイト UTF-8 文字列（`>= 0x80`）: 1 文字分のバイト列をバッファリングした上で `g_pututf8(utf8seq)`
+   - `g_putch()` および `g_pututf8()` は、Windows（`WIN32CON`）ではバックバッファ経由で `MultiByteToWideChar` ➔ `WriteConsoleW` によるコードページ非依存のワイド文字出力を行い、POSIX/Linux では安全に端末へ出力されるため、全環境でコードページの有無に関わらず文字化けを防ぐことができます。
+
+3. **メニュー・テキスト表示処理におけるプラットフォーム二重分岐の排除**:
+   - `process_menu_window()` や `process_text_window()` において、描画ループを `#ifdef WIN32CON` で分岐させて非 WIN32CON 側に `putchar(*cp)` のような古いバイト単位処理を残してはなりません。全環境共通で正確なセル幅計算＋`g_putch` / `g_pututf8` の統一ループを使用してください。
+
 
 
 
