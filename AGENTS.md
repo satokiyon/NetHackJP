@@ -418,3 +418,42 @@ Qt6 ポート（`win/Qt/`）は Qt 6（Ubuntu 26.04 / Qt 6.10.2 系、`sys/unix/
    - `run: |` ブロック内でシェルスクリプトファイルを生成する際、ヒアドキュメント（`cat << 'EOF'`）の本文を行頭（1桁目）から記述すると、YAML パーサーがトップレベルのキーと誤認して `ScannerError`（ワークフロー構文エラー）を引き起こします。
    - ファイル生成を行う際は、インデントを崩さない `{ echo '...'; } > file` 構文または `printf` を使用し、YAML のブロックインデントを厳格に保持してください。
 
+## Lua スクリプト・データファイル（*.lua）の構文保護および更新ルール
+
+1. **実行可能スクリプトにおける Shebang（`#!`）最優先配置の原則**:
+   - スクリプトとして直接実行される Lua ファイル（`sys/msdos/fonts/makefont.lua` 等）において、1行目に NetHackJP の更新ヘッダーコメント（`-- Modified by...`）を挿入してはなりません。
+   - Lua パーサー（Lua 5.4）は **1行目冒頭が `#` である場合のみ** shebang を行コメントとしてスキップする仕様となっており、2行目以降に `#` が押し出されると `unexpected symbol near '#'` 構文エラーを発生させます。
+   - したがって、shebang を持つファイルでは必ず `#!/usr/bin/env lua` などの shebang を 1 行目に維持し、更新ヘッダーコメントは 2 行目に配置してください。
+
+2. **Lua ダンジョン定義（`dat/*.lua`）編集・翻訳時のテーブル構文破壊防止**:
+   - `des.monster({...})` や `des.object({...})` などのテーブル引数を編集・日本語化する際、要素の区切りカンマ（`,`）の脱落に注意してください（例: `montype="wumpus" x=34` ➔ `'}' expected near 'x'`）。
+   - アップストリーム（NetHack 本家）側での改稿・追加コミット時にも構文エラー（カンマ抜け、タイポ等）が混入している場合があります。
+   - NetHack コアは Lua ファイルの読み込み失敗時にエラーを出力しつつ迷路（maze）階層生成等に静かにフォールバックするため、構文エラーを見落としやすい特性があります。Lua ファイルを編集・マージした際は、必ず構文検証を実行してください。
+
+3. **リポジトリ内全 Lua ファイルの構文自動検証手順**:
+   - Lua ファイルの変更・マージ時は、WSL 環境の `liblua5.4.so` や Python を利用して全 Lua ファイルのパーステストを一括実行し、エラー 0 件であることを確認してください。
+   - 実行ワンライナー:
+     ```bash
+     wsl -d Ubuntu-26.04 -- python3 -c "
+     import ctypes, glob, os, sys
+     lua = ctypes.CDLL('liblua5.4.so')
+     lua.luaL_newstate.restype = ctypes.c_void_p
+     lua.luaL_loadfilex.restype = ctypes.c_int
+     lua.luaL_loadfilex.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+     L = lua.luaL_newstate()
+     errors = []
+     for root, _, files in os.walk('/mnt/c/Users/satok/NetHackJP'):
+         if '.git' in root: continue
+         for f in files:
+             if f.endswith('.lua'):
+                 p = os.path.join(root, f)
+                 if lua.luaL_loadfilex(L, p.encode('utf-8'), None) != 0:
+                     errors.append(p)
+     if errors:
+         print(f'Lua syntax errors found in: {errors}')
+         sys.exit(1)
+     print('All lua files valid.')
+     "
+     ```
+
+
