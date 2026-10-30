@@ -1,7 +1,9 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-21. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-10-30. -->
 # NetHack 5.0 (非公式)日本語化プロジェクト
 
 NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.nethack.org/)5.0 を日本語で快適にプレイできるようにすることを目的とした非公式プロジェクトです。(対象OSはWindowsとLinuxのみ)
+
+- [NetHackガイドブック](Guidebok/Guidebook_JP.md)
 
 ## スクリーンショット
 <figure>
@@ -235,7 +237,7 @@ OPTIONS=align_message:top,msw_msg_rows:6
 OPTIONS=align_status:right,msw_stat_cols:15
 ```
 
-設定例が `.nethackrc`（または `nethackrc.CUI`、`nethackrc.GUI`）に記載されていますので、そちらも参考にしてください。その他の詳細なオプション等については `Guidebook_JP.txt` を参照してください。
+設定例が `.nethackrc`（または `nethackrc.CUI`、`nethackrc.GUI`）に記載されていますので、そちらも参考にしてください。その他の詳細なオプション等については `Guidebook_JP.txt` ( [NetHackガイドブック](Guidebok/Guidebook_JP.md) )を参照してください。
 
 ----
 
