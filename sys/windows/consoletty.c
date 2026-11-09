@@ -1284,7 +1284,7 @@ really_move_cursor(void)
     char oldtitle[BUFSZ], newtitle[BUFSZ];
     if (display_cursor_info && wizard) {
         oldtitle[0] = '\0';
-        if (GetConsoleTitle(oldtitle, BUFSZ)) {
+        if (GetConsoleTitleA(oldtitle, BUFSZ)) {
             oldtitle[39] = '\0';
         }
         Snprintf(newtitle, sizeof newtitle,
@@ -1292,7 +1292,7 @@ really_move_cursor(void)
                  oldtitle,
                  ttyDisplay->curx, ttyDisplay->cury,
                  console.cursor.X, console.cursor.Y);
-        (void) SetConsoleTitle(newtitle);
+        (void) SetConsoleTitleA(newtitle);
     }
 #endif
     if (ttyDisplay)
@@ -1364,9 +1364,9 @@ console_put_utf8_sequence(const unsigned char *utf8str, int ulen)
     if (ulen < 2 || ulen >= MAX_UTF8_SEQUENCE)
         return;
 
-    cell.attr = console.attr;
-    cell.colorseq = esc_seq_colors[console.current_nhcolor];
-    cell.bkcolorseq = esc_seq_bkcolors[console.current_nhbkcolor];
+    cell.attr = console.active.attribute;
+    cell.colorseq = esc_seq_colors[console.active.color];
+    cell.bkcolorseq = esc_seq_bkcolors[console.active.bkcolor];
     cell.color24 = console.color24 ? console.color24 : 0L;
     cell.color256idx = console.color256idx ? console.color256idx : 0;
     for (i = 0; i < ulen; ++i)
