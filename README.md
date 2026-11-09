@@ -113,7 +113,7 @@ WSL / Linux で X11 版（`./nethackX11`）を起動し、`#名前` `#記念碑`
    ```
 3. X11 版を起動:
    ```bash
-   XAPPLRESDIR=./playground ./playground/nethackW
+   XAPPLRESDIR=./playground ./playground/nethackX11
    ```
    起動直後に stderr に `XIM: connected to input method` と出れば fcitx5/ibus との接続に成功。`XIM: XOpenIM failed` と出る場合は上記環境変数やデーモンの起動状態を確認してください。
 
