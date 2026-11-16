@@ -32,6 +32,11 @@ NetHackJPは、ローグライクゲームの金字塔 [NetHack](https://www.net
 </figure>
 ---
 
+## Youtube
+- [NetHack再生リスト](https://www.youtube.com/playlist?list=PLKBNYid2v3B8)
+
+---
+
 ## 🎮 プレイヤー向け情報（ゲームの始め方）
 
 さっそくダウンロードして[NetHack](https://www.nethack.org/)を日本語で遊んでみてください!
