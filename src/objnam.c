@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-14. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 objnam.c 2026/11/02_21:05:17 NetHack-5.0:1.474 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2011. */
@@ -1800,7 +1800,7 @@ doname_base(
         long quotedprice = unpaid_cost(obj, COST_CONTENTS);
 
         /* separately formatted suffix avoids need for ConcatF3() */
-        Sprintf(pricebuf, "%ld %s", quotedprice, currency(quotedprice));
+        Sprintf(pricebuf, "%ld%s", quotedprice, currency(quotedprice));
         ConcatF2(bp, 0, " (%s, %s)",
                  obj->unpaid ? "未払い" : "中身", pricebuf);
 
@@ -1812,7 +1812,7 @@ doname_base(
         if (price > 0L) {
             char pricebuf[BUFSZ];
 
-            Sprintf(pricebuf, "%ld %s", price, currency(price));
+            Sprintf(pricebuf, "%ld%s", price, currency(price));
             ConcatF2(bp, 0, " (%s, %s)",
                      nochrg ? "中身" : "販売中", pricebuf);
         } else if (nochrg > 0) {

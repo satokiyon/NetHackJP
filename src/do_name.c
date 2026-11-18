@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-15. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 do_name.c 2026/08/16_14:31:31 NetHack-5.0:1.342 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Pasi Kallinen, 2018. */
@@ -929,8 +929,6 @@ x_monnam(
         name = priestname(mtmp, article, do_exact, buf2);
         EHalluc_resistance = save_prop;
         mtmp->minvis = save_invis;
-        if (article == ARTICLE_NONE && !strncmp(name, "the ", 4))
-            name += 4;
         return strcpy(buf, name);
     }
 
@@ -1420,8 +1418,8 @@ distant_monnam(
        its own obfuscation) */
     if (mon->data == &mons[PM_HIGH_CLERIC] && !Hallucination
         && Is_astralevel(&u.uz) && !m_next2u(mon)) {
-        Strcpy(outbuf, article == ARTICLE_THE ? "the " : "");
-        Strcat(outbuf, mon->female ? "high priestess" : "high priest");
+        nhUse(article);
+        Strcpy(outbuf, mon->female ? "高位の女僧侶" : "高位の僧侶");
     } else {
         Strcpy(outbuf, x_monnam(mon, article, (char *) 0, 0, TRUE));
     }

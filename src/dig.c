@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-14. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 dig.c 2026/06/20_22:26:43 NetHack-5.0:1.238 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Michael Allison, 2012. */
@@ -1829,7 +1829,7 @@ adj_pit_checks(coord *cc, char *msg)
 
         if (supporting) {
             Sprintf(msg, "%sを支える構造は無傷のままだ.",
-                    s_suffix(supporting));
+                    supporting);
             return FALSE;
         }
     }
@@ -2074,7 +2074,7 @@ bury_objs(int x, int y)
     maybe_unhide_at(x, y);
 
     if (costly && loss) {
-        You("商品を引き埋めた代金として、%sに%ld %sの借りがある.",
+        You("商品を埋めた代金として、%sに%ld%sの借りがある.",
             jp_shkname_for_display(shkp), loss, currency(loss));
     }
 }

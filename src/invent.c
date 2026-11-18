@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-09. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 invent.c 2026/06/20 16:30:52 NetHack-5.0:1.569 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Derek S. Ray, 2015. */
@@ -1696,12 +1696,8 @@ static const char *const currencies[] = {
 const char *
 currency(long amount)
 {
-    const char *res;
-
-    res = Hallucination ? ROLL_FROM(currencies) : "ゾークミッド";
-    if (amount != 1L)
-        res = makeplural(res);
-    return res;
+    nhUse(amount);
+    return Hallucination ? ROLL_FROM(currencies) : "ゾークミッド";
 }
 
 struct obj *
@@ -3943,7 +3939,7 @@ dounpaid(
                     char contbuf[BUFSZ];
 
                     /* Shopkeeper knows what to charge for contents */
-                        Sprintf(contbuf, "%sの中身", s_suffix(xname(otmp)));
+                    Sprintf(contbuf, "%sの中身", xname(otmp));
                     putstr(win, 0,
                            xprname((struct obj *) 0, contbuf, CONTAINED_SYM,
                                    TRUE, contcost, 0L));
@@ -4337,7 +4333,7 @@ look_here(
          *  something along the lines of "because it's worn on the outside
          *  so is unreachable from in here...").
          */
-        Sprintf(fbuf, "%sの%s", s_suffix(mon_nam(mtmp)),
+        Sprintf(fbuf, "%sの%s", mon_nam(mtmp),
             jp_mbodypart(mtmp, STOMACH));
         You("%sに何があるのか%s.", fbuf,
             Blind ? "確かめようとした" : "見回した");
@@ -4718,20 +4714,20 @@ doprgold(void)
         if (!umoney) {
             Strcpy(buf, "財布は空だ");
         } else {
-            Sprintf(buf, "財布には%ld %sが入っている",
+            Sprintf(buf, "財布には%ld%sが入っている",
                     umoney, currency(umoney));
         }
         if (hmoney) {
             Sprintf(eos(buf),
-                    "%s荷物の中に%ld %sを隠している",
+                    "%s荷物の中に%ld%sを隠している",
                     umoney ? "、さらに" : "、だが", hmoney,
-                    umoney ? "ほかに" : currency(hmoney));
+                    currency(hmoney));
         }
         pline("%s.", buf);
     } else {
         long total = umoney + hmoney;
         if (total)
-            You("合計で%ld %sを持っていた.", total, currency(total));
+            You("合計で%ld%sを持っていた.", total, currency(total));
         else
             You("お金を持っていない.");
     }

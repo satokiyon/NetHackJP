@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-14. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 zap.c 2026/06/20_16:31:15 NetHack-5.0:1.601 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2013. */
@@ -1054,11 +1054,8 @@ revive(struct obj *corpse, boolean by_hero)
         if (cansee(x, y)) {
             char buf[BUFSZ];
 
-            Strcpy(buf, one_of ? "ひとつの " : "");
-            /* shk_your: "the " or "your " or "<mon>'s " or "<Shk>'s ".
-               If the result is "Shk's " then it will be ambiguous:
-               is Shk the mon carrying it, or does Shk's shop own it?
-               Let's not worry about that... */
+            Strcpy(buf, one_of ? "1つの" : "");
+            /* shk_your: "あなたの" or "<mon>の" or "<Shk>の" */
             (void) shk_your(eos(buf), corpse);
             if (one_of)
                 corpse->quan++; /* force plural */
@@ -1207,9 +1204,9 @@ unturn_dead(struct monst *mon)
         if (youseeit) {
             Strcpy(corpse,
                    jp_corpse_xname(otmp, (const char *) 0, CXN_NORMAL));
-            /* shk_your/Shk_Your produces a value with a trailing space */
+            /* shk_your/Shk_Your produces Japanese ownership prefix */
             if (otmp->quan > 1L) {
-                Strcpy(owner, "ひとつの ");
+                Strcpy(owner, "1つの");
                 (void) shk_your(eos(owner), otmp);
             } else
                 (void) Shk_Your(owner, otmp);
@@ -4924,7 +4921,7 @@ dobuzz(
                             hit(flash_str(fltyp, FALSE), mon, ".");
                             pline("%sは分解した.", l_monnam(mon));
                             pline("%sの体があなたの%sの前で再構成された!",
-                                  s_suffix(Monnam(mon)),
+                                  Monnam(mon),
                                   (eyecount(gy.youmonst.data) == 1)
                                       ? jp_body_part(EYE)
                                       : jp_body_part_plural(EYE));
@@ -4972,7 +4969,7 @@ dobuzz(
                             /* some armor was destroyed; no damage done */
                             if (canseemon(mon))
                                 pline("%sの%sは分解された!",
-                                      s_suffix(Monnam(mon)),
+                                      Monnam(mon),
                                       distant_name(otmp, xname));
                             m_useup(mon, otmp);
                         }

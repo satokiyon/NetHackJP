@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-04. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 weapon.c 2026/06/20_22:26:43 NetHack-5.0:1.149 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2011. */
@@ -970,7 +970,7 @@ mon_wield_item(struct monst *mon)
 
                 /* bimanual(obj) の場合でも日本語では複数形は不要 */
                 pline("%sは%sの%sにくっついた!", Tobjnam(obj, (char *)0),
-                      s_suffix(mon_nam(mon)), mon_hand);
+                      mon_nam(mon), mon_hand);
                 obj->bknown = 1;
             }
         }
@@ -978,7 +978,7 @@ mon_wield_item(struct monst *mon)
             begin_burn(obj, FALSE);
             if (canseemon(mon))
                 pline("%sが%sの%sで輝き始めた!", Tobjnam(obj, (char *)0),
-                      s_suffix(mon_nam(mon)), jp_mbodypart(mon, HAND));
+                      mon_nam(mon), jp_mbodypart(mon, HAND));
             /* 3.6.3: artifact might be getting wielded by invisible monst */
             else if (cansee(mon->mx, mon->my))
                     pline("光が%sで輝き始めた.",

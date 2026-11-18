@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-14. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 mon.c 2026/11/02_21:05:17 NetHack-5.0:1.643 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Derek S. Ray, 2015. */
@@ -1371,7 +1371,7 @@ meatbox(struct monst *mon, struct obj *otmp)
       powerful */
     if (!engulf_contents && cansee(x, y)) {
         pline("%sの中身が%sの上にこぼれた.",
-              s_suffix(The(distant_name(otmp, xname))),
+              distant_name(otmp, xname),
               surface(x, y));
     }
     while ((cobj = otmp->cobj) != 0) {

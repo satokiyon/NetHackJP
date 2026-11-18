@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-04. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 dokick.c 2026/06/20_22:26:43 NetHack-5.0:1.239 $ */
 /* Copyright (c) Izchak Miller, Mike Stephenson, Steve Linhart, 1989. */
 /* NetHack may be freely redistributed.  See license for details. */
@@ -339,7 +339,7 @@ ghitm(struct monst *mtmp, struct obj *gold)
                 SetVoice(mtmp, 0, 80, 0);
                 if (mtmp->mpeaceful) {
                     ESHK(mtmp)->credit += value;
-                    You("%ld %sの預かり金ができた.", ESHK(mtmp)->credit,
+                    You("%ld%sの預かり金ができた.", ESHK(mtmp)->credit,
                         currency(ESHK(mtmp)->credit));
                 } else
                     verbalize("礼は言っておくぞ、このクズ!");
@@ -476,10 +476,10 @@ container_impact_dmg(
         obj->owt = weight(obj);
     if (costly && loss) {
         if (!insider) {
-            You("%ld %sぶんの損害を与えた!", loss, currency(loss));
+            You("%ld%sぶんの損害を与えた!", loss, currency(loss));
             make_angry_shk(shkp, x, y);
         } else {
-            You("壊した品物の代金として%sに%ld %s支払う必要がある.", jp_shkname_for_display(shkp), loss,
+            You("壊した品物の代金として%sに%ld%s支払う必要がある.", jp_shkname_for_display(shkp), loss,
                 currency(loss));
         }
     }
@@ -1609,7 +1609,7 @@ impact_drop(
 
     if (costly && shkp && price) {
         if (ESHK(shkp)->robbed > robbed) {
-            You("%ld %s分の商品を失わせてしまった!", price, currency(price));
+            You("%ld%s分の商品を失わせてしまった!", price, currency(price));
             if (cansee(shkp->mx, shkp->my)) {
                 if (ESHK(shkp)->customer[0] == 0)
                     (void) strncpy(ESHK(shkp)->customer, svp.plname, PL_NSIZ);
@@ -1618,14 +1618,14 @@ impact_drop(
                 else
                     pline("\"%s、お前は盗人だ!\"", svp.plname);
             } else
-                You_hear("叫び声が聞こえる, \"盗人だ!\"");
+                You_hear("「盗人だ!」と叫ぶ声が聞こえた.");
             hot_pursuit(shkp);
             (void) angry_guards(FALSE);
             return;
         }
         if (ESHK(shkp)->debit > debit) {
             long amt = (ESHK(shkp)->debit - debit);
-            You("失わせた商品の代金として%sに%ld %s支払う必要がある.", jp_shkname_for_display(shkp), amt,
+            You("失わせた商品の代金として%sに%ld%s支払う必要がある.", jp_shkname_for_display(shkp), amt,
                 currency(amt));
         }
     }

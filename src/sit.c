@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-04. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 sit.c 2026/06/20_22:26:43 NetHack-5.0:1.114 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2012. */
@@ -167,9 +167,6 @@ throne_sit_effect(void)
                     switch (num_of_eyes) { /* 2, 1, or 0 */
                     default:
                     case 2: /* more than 1 eye */
-                        eye = makeplural(eye);
-                        FALLTHROUGH;
-                        /*FALLTHRU*/
                     case 1: /* one eye (Cyclops, floating eye) */
                         Your("%sがむずむずした...", eye);
                         break;

@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-12. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 do_wear.c 2026/06/20_22:26:43 NetHack-5.0:1.214 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2012. */
@@ -2318,8 +2318,6 @@ accessory_or_armor_on(struct obj *obj)
                     const char *hand = jp_body_part(HAND);
 
                     /* welded will set bknown */
-                    if (bimanual(uwep))
-                        hand = makeplural(hand);
                     You("指輪をはめるために武器を持つ%sを空けられない.",
                         hand);
                     /* uses move iff we learned weapon is cursed */

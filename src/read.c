@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-14. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 read.c 2026/07/04_18:17:43 NetHack-5.0:1.337 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2012. */
@@ -2150,13 +2150,8 @@ seffect_earth(struct obj **sobjp)
                 pline_The("%sがあなたの%sで鳴り響いた!", ceiling(u.ux, u.uy),
                           sblessed ? "周囲" : "頭上");
             } else {
-                char matbuf[BUFSZ];
-                const char *const avalanche = "avalanche";
-
-                Sprintf(matbuf, "%s",
-                        sblessed ? makeplural(avalanche) : an(avalanche));
                 pline("%sが%sから%sのように降ってきた!",
-                      upstart(matbuf),
+                      sblessed ? "雪崩" : "岩塊",
                       sblessed ? "周囲" : "頭上",
                       sblessed ? "雪崩" : "塊");
             }
@@ -2576,7 +2571,7 @@ drop_boulder_on_monster(coordxy x, coordxy y, boolean confused, boolean byu)
                 map_invisible(mtmp->mx, mtmp->my);
         } else if (engulfing_u(mtmp))
             You_hear("何かが%sの%s越しにあなたの%sへぶつかる音が聞こえる!",
-                     s_suffix(mon_nam(mtmp)), jp_mbodypart(mtmp, STOMACH),
+                     mon_nam(mtmp), jp_mbodypart(mtmp, STOMACH),
                      jp_body_part(HEAD));
 
         mdmg = dmgval(otmp2, mtmp) * otmp2->quan;

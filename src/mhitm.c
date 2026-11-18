@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-04. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 mhitm.c 2026/06/20_22:26:43 NetHack-5.0:1.271 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2011. */
@@ -369,8 +369,6 @@ mattackm(
 
                 montype = noname_monnam(mdef, justone ? ARTICLE_THE
                                                       : ARTICLE_NONE);
-                if (!justone)
-                    montype = makeplural(montype);
                 You("%sの夢を見た。", montype);
             } else {
                 if (iflags.last_msg == PLNMSG_HIDE_UNDER

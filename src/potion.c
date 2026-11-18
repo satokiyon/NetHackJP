@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-14. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 potion.c 2026/06/20_22:26:43 NetHack-5.0:1.290 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2013. */
@@ -288,8 +288,6 @@ make_blinded(long xtime, boolean talk)
                 strange_feeling((struct obj *) 0, (char *) 0);
             } else if (Blindfolded) {
                 eyes = jp_body_part(EYE);
-                if (eyecount(gy.youmonst.data) != 1)
-                    eyes = makeplural(eyes);
                 Your("%sが一瞬かゆくなった.", eyes);
             } else { /* Eyes of the Overworld */
                 Your(vismsg, "明るくなった", Hallucination ? "さらに奇妙だ" : "普段どおりだ");
@@ -314,8 +312,6 @@ make_blinded(long xtime, boolean talk)
                 strange_feeling((struct obj *) 0, (char *) 0);
             } else if (Blindfolded) {
                 eyes = jp_body_part(EYE);
-                if (eyecount(gy.youmonst.data) != 1)
-                    eyes = makeplural(eyes);
                 Your("%sが一瞬ぴくりと動いた.", eyes);
             } else { /* Eyes of the Overworld */
                 Your(vismsg, "暗くなった", Hallucination ? "さらに奇妙だ" : "普段どおりだ");
@@ -397,8 +393,6 @@ make_hallucinated(
             } else if (Blind) {
                 const char *eyes = jp_body_part(EYE);
 
-                if (eyecount(gy.youmonst.data) != 1)
-                    eyes = makeplural(eyes);
                 Your("%sが一瞬かゆくなった.", eyes);
             } else { /* Grayswandir */
                 Your(vismsg, "平板になった", "普段どおりだ");
@@ -1657,11 +1651,11 @@ potionhit(struct monst *mon, struct obj *obj, int how)
 
             if (hit_saddle && saddle) {
                 Sprintf(buf, "%sの鞍",
-                        s_suffix(x_monnam(mon, ARTICLE_THE, (char *) 0,
-                                          (SUPPRESS_IT | SUPPRESS_SADDLE),
-                                          FALSE)));
+                        x_monnam(mon, ARTICLE_THE, (char *) 0,
+                                 (SUPPRESS_IT | SUPPRESS_SADDLE),
+                                 FALSE));
             } else if (has_head(mon->data)) {
-                Sprintf(buf, "%sの%s", s_suffix(mnam),
+                Sprintf(buf, "%sの%s", mnam,
                         (gn.notonhead ? "胴体" : "頭"));
             } else {
                 Strcpy(buf, mnam);
@@ -1708,11 +1702,11 @@ potionhit(struct monst *mon, struct obj *obj, int how)
 
         mnam = x_monnam(mon, ARTICLE_THE, (char *) 0,
                         (SUPPRESS_IT | SUPPRESS_SADDLE), FALSE);
-        Sprintf(buf, "%s", upstart(s_suffix(mnam)));
+        Sprintf(buf, "%sの鞍", upstart(mnam));
 
         switch (obj->otyp) {
         case POT_WATER:
-            Snprintf(saddle_glows, sizeof(saddle_glows), "%s鞍", buf);
+            Snprintf(saddle_glows, sizeof(saddle_glows), "%s", buf);
             affected = H2Opotion_dip(obj, saddle, useeit, saddle_glows);
             break;
         case POT_POLYMORPH:
@@ -1950,8 +1944,6 @@ potionbreathe(struct obj *obj)
             } else if (haseyes(gy.youmonst.data)) {
                 const char *eyes = jp_body_part(EYE);
 
-                if (eyecount(gy.youmonst.data) != 1)
-                    eyes = makeplural(eyes);
                 Your("%sが痛んだ!", eyes);
             }
             break;

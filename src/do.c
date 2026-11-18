@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-14. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 do.c 2026/10/17_14:49:13 NetHack-5.0:1.416 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Derek S. Ray, 2015. */
@@ -676,8 +676,6 @@ canletgo(struct obj *obj, const char *word)
         if (*word) {
             const char *hand = jp_body_part(HAND);
 
-            if (bimanual(uwep))
-                hand = makeplural(hand);
             Norep("あなたの%sに溶接された%sを%sことはできない.", hand, something,
                   action_jp);
         }
@@ -2435,8 +2433,6 @@ legs_in_no_shape(const char *for_what, /* jumping, kicking, riding */
         long wl = (EWounded_legs & BOTH_SIDES);
         const char *bp = jp_body_part(LEG);
 
-        if (wl == BOTH_SIDES)
-            bp = makeplural(bp);
         Your("%s%sは%sができる状態ではない.",
              (wl == LEFT_SIDE) ? "左の" : (wl == RIGHT_SIDE) ? "右の" : "",
              bp, for_what);
@@ -2482,8 +2478,6 @@ heal_legs(
         if (!u.usteed && how != 2) {
             const char *legs = jp_body_part(LEG);
 
-            if ((EWounded_legs & BOTH_SIDES) == BOTH_SIDES)
-                legs = makeplural(legs);
             /* this used to say "somewhat better" but that was
                misleading since legs are being fully healed */
             Your("%sの具合が良くなった.", legs);
