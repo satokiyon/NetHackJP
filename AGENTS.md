@@ -30,9 +30,10 @@
   - 神名: `jp_align_gname_for_display()`, `jp_gname_for_display()`, `jp_u_gname_for_display()`, `jp_a_gname_for_display()`, `jp_a_gname_at_for_display()`
   - 職業・肩書・種族: `jp_role_name_for_display()`, `jp_rank_of_for_display()`, `jp_current_race_noun()`, `jp_race_noun_for_display()`
   - モンスター・アイテム: `jp_pmname()` / `jp_pmname_from_idx()`, `jp_item_name()` / `jp_item_descr()`
+- **設定オプション名・設定値キーワードの保護**: `"O"` コマンド等で表示されるオプション名および `.nethackrc`・ガイドブックに対応する設定値キーワード（例: `autopickup`, `hilite_status`, `symset`, `none`, `full`, `brief` 等）は翻訳せず英語のまま保持すること（エラー本文や説明文の周辺テキストのみ日本語化する）。
 - **英語ヘルパーの排除**: `an()`, `the()`, `makeplural()`, `s_suffix()`, `plur()`, `uhis()`, `uhim()`, `noit_mhe()` / `noit_mhim()` / `noit_mhis()` を日本語メッセージ内で使わないこと（通貨単位は `currency(amt)` を使用）。
 - **マクロ接続とフォーマット整合**:
-  - `You()` は先頭に「あなたは」を自動付与するため、主語を伴わない通知には `pline()` を使うこと。`You_hear()` / `You_see()` / `You_feel()` は体言止めを避け、述語まで含めた完全な文にすること。
+  - `You()` は先頭に「あなたは」を、`There()` は先頭に「そこに」を自動付与するため、呼び出し側のリテラル先頭に「そこに」「ここに」「には」等を重複させないこと（主語や場所指定を伴わない通知には `pline()` を使う）。`Your()` は自動「あなたの」付与を行わない。`You_hear()` / `You_see()` / `You_feel()` は体言止めを避け、述語まで含めた完全な文にすること。
   - `pline()` 等の可変引数マクロでは、`%` 指定子（特に `%c` と `%s`）の個数・型・順序を実引数と完全一致させること。
   - 日本語化で固定長バッファ（`char buf[N]`）を扱う際は UTF-8（全角 3 バイト/文字）を考慮し、十分なサイズ（64〜128 バイト以上または `BUFSZ`）を確保すること。
 - **主要訳語・代名詞マクロの統一**:
