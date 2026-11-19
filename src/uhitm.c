@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-14. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 uhitm.c 2026/06/20_22:26:43 NetHack-5.0:1.505 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2012. */
@@ -908,8 +908,10 @@ hmon_hitmon_weapon_ranged(
         if (!more_than_1)
             uwepgone(); /* set gu.unweapon */
         useup(obj);
-        if (!more_than_1)
+        if (!more_than_1) {
             obj = (struct obj *) 0;
+            hmd->obj_gone = TRUE;
+        }
         hmd->hittxt = TRUE;
         if (hmd->mdat != &mons[PM_SHADE])
             hmd->dmg++;
@@ -1132,6 +1134,7 @@ hmon_hitmon_misc_obj(
             change_luck(-2);
             useup(obj);
             obj = (struct obj *) 0;
+            hmd->obj_gone = TRUE;
             hmd->unarmed = FALSE; /* avoid obj==0 confusion */
             hmd->get_dmg_bonus = FALSE;
             hmd->hittxt = TRUE;
@@ -1181,6 +1184,7 @@ hmon_hitmon_misc_obj(
         else                             \
             useupall(o);                 \
         o = (struct obj *) 0;            \
+        hmd->obj_gone = TRUE;            \
     } while (0) /* now gone */
     case EGG: {
         long cnt = obj->quan;
@@ -1304,8 +1308,10 @@ hmon_hitmon_misc_obj(
             else
                 useup(obj);
 
-            if (!more_than_1)
+            if (!more_than_1) {
                 obj = (struct obj *) 0;
+                hmd->obj_gone = TRUE;
+            }
         }
         hmd->hittxt = TRUE;
         hmd->get_dmg_bonus = FALSE;
@@ -1327,8 +1333,10 @@ hmon_hitmon_misc_obj(
             else
                 useup(obj);
 
-            if (!more_than_1)
+            if (!more_than_1) {
                 obj = (struct obj *) 0;
+                hmd->obj_gone = TRUE;
+            }
         }
         hmd->hittxt = TRUE;
         hmd->get_dmg_bonus = FALSE;
@@ -1555,6 +1563,7 @@ hmon_hitmon_jousting(
         /* minor side-effect: broken lance won't split puddings */
         useup(obj);
         obj = (struct obj *) 0;
+        hmd->obj_gone = TRUE;
     }
     if (mhurtle_to_doom(mon, hmd->dmg, &hmd->mdat))
         hmd->already_killed = TRUE;
@@ -1789,9 +1798,14 @@ hmon_hitmon(
     hmd.dryit = FALSE;
     hmd.doreturn = FALSE;
     hmd.retval = FALSE;
+    hmd.obj_gone = FALSE;
     hmd.saved_oname[0] = '\0';
 
     hmon_hitmon_do_hit(&hmd, mon, obj);
+    /* the helpers get obj by value; if one of them used it up, our own
+       copy of the pointer is left pointing at freed memory */
+    if (hmd.obj_gone)
+        obj = (struct obj *) 0;
     if (hmd.doreturn)
         return hmd.retval;
 
@@ -1823,6 +1837,8 @@ hmon_hitmon(
 
     if (hmd.jousting) {
         hmon_hitmon_jousting(&hmd, mon, obj);
+        if (hmd.obj_gone) /* lance shattered */
+            obj = (struct obj *) 0;
     } else if (hmd.unarmed && hmd.dmg > 1 && !thrown && !obj && !Upolyd) {
         hmon_hitmon_stagger(&hmd, mon, obj);
     } else if (!hmd.unarmed && hmd.dmg > 1 && !thrown && !Upolyd

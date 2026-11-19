@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-04. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-19. */
 /* $NHDT-Header: NetHack 5.0 options.c 2026/09/30_14:47:34 NetHack-5.0:1.799 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Michael Allison, 2008. */
@@ -5431,6 +5431,12 @@ optfn_boolean(
                   " compiled in.");
             iflags.idlecheckpoint = FALSE;
             give_opt_msg = FALSE;
+            break;
+#endif
+#ifdef WIN32CON
+        case opt_windowsterminal:
+            iflags.wt_how =
+                (negated) ? wt_in_config_negated : wt_in_config_not_negated;
             break;
 #endif
         default:
