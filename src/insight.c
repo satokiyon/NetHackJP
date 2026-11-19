@@ -1225,7 +1225,7 @@ status_enlightenment(int mode, int final)
         (void) enlght_combatinc("to hit", -gu.urole.spelarmr, final, buf);
         /* if from_what() ever gets extended from wizard mode to normal
            play, it could be adapted to handle this */
-        Sprintf(eos(buf), "（あなたの%sによる）", suit_simple_name(uarm));
+        Sprintf(eos(buf), "（%sによる）", suit_simple_name(uarm));
         you_have(buf, "");
     }
     /* report 'nudity' */

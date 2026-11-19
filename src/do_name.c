@@ -735,7 +735,7 @@ namefloorobj(void)
     }
     if (!obj) {
         /* "under you" is safe here since there's no object to hide under */
-        There("にはそのような物体が%sないようだ.",
+        There("はそのような物体が%sないようだ.",
               u_at(cc.x, cc.y) ? "足元に" : "");
         return;
     }
@@ -968,6 +968,8 @@ x_monnam(
             Strcat(buf, "かわいそうな");
         else if (!strcmp(adjective, "poor, unseen"))
             Strcat(buf, "見えない、かわいそうな");
+        else if (!strcmp(adjective, "unseen"))
+            Strcat(buf, "見えない");
         else
             Strcat(buf, adjective);
     }

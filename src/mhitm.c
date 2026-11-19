@@ -1148,7 +1148,7 @@ mdamagem(
 int
 mon_poly(struct monst *magr, struct monst *mdef, int dmg)
 {
-    static const char freaky[] = " undergoes a freakish metamorphosis";
+    static const char freaky[] = "は奇妙な変身を遂げ";
     struct permonst *oldform = mdef->data;
 
     if (mdef == &gy.youmonst) {
@@ -1203,15 +1203,21 @@ mon_poly(struct monst *magr, struct monst *mdef, int dmg)
                 boolean was_seen = !!strcmpi("それ", Before),
                         verbosely = flags.verbose || !was_seen;
 
-                if (canspotmon(mdef))
-                    pline("%s%s%s%sに変わった.", Before,
-                          verbosely ? freaky : "", verbosely ? " and" : "",
-                          x_monnam(mdef, ARTICLE_A, (char *) 0,
-                                   (SUPPRESS_NAME | SUPPRESS_IT
-                                    | SUPPRESS_INVISIBLE), FALSE));
-                else if (was_seen || magr == &gy.youmonst)
+                if (canspotmon(mdef)) {
+                    if (verbosely)
+                        pline("%s%s、%sに変わった.", Before, freaky,
+                              x_monnam(mdef, ARTICLE_A, (char *) 0,
+                                       (SUPPRESS_NAME | SUPPRESS_IT
+                                        | SUPPRESS_INVISIBLE), FALSE));
+                    else
+                        pline("%sは%sに変わった.", Before,
+                              x_monnam(mdef, ARTICLE_A, (char *) 0,
+                                       (SUPPRESS_NAME | SUPPRESS_IT
+                                        | SUPPRESS_INVISIBLE), FALSE));
+                } else if (was_seen || magr == &gy.youmonst) {
                     pline("%s%s%s.", Before, freaky,
-                          !was_seen ? "" : " and disappears");
+                          !was_seen ? "た" : "て姿を消した");
+                }
             }
             dmg = 0;
             if (can_teleport(magr->data)) {
@@ -1318,7 +1324,7 @@ mswingsm(
                             <= 2));
 
                 pline("%sは%s%sで%sを攻撃した.", Monnam(magr),
-              (otemp->quan > 1L) ? "そのうち1つの" : "その",
+              (otemp->quan > 1L) ? "そのうち1つの" : "",
               xname(otemp), mon_nam(mdef));
     }
 }

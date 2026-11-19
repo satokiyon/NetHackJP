@@ -1231,17 +1231,17 @@ use_crystal_ball(struct obj **optr)
             break;
         case 3:
             if (!resists_blnd(&gy.youmonst)) {
-                pline("%sはあなたの視界を傷つけた!", Tobjnam(obj, (char *)0));
+                pline("%sは視界を傷つけた!", Tobjnam(obj, (char *)0));
                 make_blinded(BlindedTimeout + impair, FALSE);
                 if (!Blind)
                     Your1(vision_clears);
             } else {
-                pline("%sはあなたの視界を襲った.", Tobjnam(obj, (char *)0));
+                pline("%sは視界を襲った.", Tobjnam(obj, (char *)0));
                 You("影響を受けなかった!");
             }
             break;
         case 4:
-            pline("%sはあなたの精神を打った!", Tobjnam(obj, (char *)0));
+            pline("%sは精神を打った!", Tobjnam(obj, (char *)0));
             (void) make_hallucinated((HHallucination & TIMEOUT) + impair,
                                      FALSE, 0L);
             break;

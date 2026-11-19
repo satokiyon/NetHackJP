@@ -1023,7 +1023,7 @@ staticfn void
 peffect_gain_ability(struct obj *otmp)
 {
     if (otmp->cursed) {
-        pline("うげっ! そのポーションはひどい味だった!");
+        pline("うげっ! ひどい味だった!");
         gp.potion_unkn++;
     } else if (Fixed_abil) {
         gp.potion_nothing++;
@@ -1625,7 +1625,7 @@ potionhit(struct monst *mon, struct obj *obj, int how)
     if (isyou) {
         tx = u.ux, ty = u.uy;
         distance = 0;
-        pline_The("%sがあなたの%sに当たり、砕け散った.", botlnam,
+        pline_The("%sが%sに当たり、砕け散った.", botlnam,
               jp_body_part(HEAD));
         losehp(Maybe_Half_Phys(rnd(2)),
                (how == POTHIT_OTHER_THROW) ? "propelled potion" /* scatter */
@@ -1934,13 +1934,13 @@ potionbreathe(struct obj *obj)
        naming opportunity in case potion was thrown at hero by a monster */
     switch (Half_gas_damage ? TOWEL : obj->otyp) {
     case TOWEL:
-        pline("蒸気がとくに影響なくあなたの周りを通り過ぎた.");
+        pline("蒸気がとくに影響なく周囲を通り過ぎた.");
         break;
     case POT_RESTORE_ABILITY:
     case POT_GAIN_ABILITY:
         if (obj->cursed) {
             if (!breathless(gy.youmonst.data)) {
-                pline("うえっ! その薬はひどい臭いだ!");
+                pline("うえっ! ひどい臭いだ!");
             } else if (haseyes(gy.youmonst.data)) {
                 const char *eyes = jp_body_part(EYE);
 
@@ -2632,7 +2632,7 @@ potion_dip(struct obj *obj, struct obj *potion)
         if (potion->lamplit) { /* burning */
             fire_damage(obj, TRUE, u.ux, u.uy);
         } else if (potion->cursed) {
-            pline_The("薬瓶がこぼれてあなたの%sが油まみれになった.",
+            pline_The("薬瓶がこぼれて%sが油まみれになった.",
                       fingers_or_gloves(TRUE));
             make_glib((int) (Glib & TIMEOUT) + d(2, 10));
         } else if (obj->oclass != WEAPON_CLASS && !is_weptool(obj)) {

@@ -407,8 +407,8 @@ wiz_kill(void)
                    need to have the mon_moving flag be True in order to
                    avoid blaming or crediting hero for their deaths */
                 svc.context.mon_moving = TRUE;
-                pline("%s is %s.", upstart(Mn),
-                      nonliving(mtmp->data) ? "destroyed" : "killed");
+                pline("%sは%sされた.", upstart(Mn),
+                      nonliving(mtmp->data) ? "破壊" : "殺害");
                 /* Null second arg suppresses the usual message */
                 monkilled(mtmp, (char *) 0, AD_PHYS);
                 svc.context.mon_moving = FALSE;
@@ -418,7 +418,7 @@ wiz_kill(void)
             if (u.utotype || !on_level(&u.uz, &uarehere))
                 break;
         } else {
-            There("にはモンスターがいない.");
+            There("はモンスターがいない.");
             break;
         }
     }
@@ -637,7 +637,7 @@ wiz_fuzzer(void)
 {
     if (flags.suppress_alert < FEATURE_NOTICE_VER(3,7,0)) {
         pline("ファズテスターはNetHackにランダムなキー入力を実行させます。");
-        There("にはこのモードから抜け出す通常の方法はない.");
+        pline("このモードから抜け出す通常の方法はない.");
     }
     if (paranoid_query(TRUE, "ファズテストを開始しますか？")) {
         /* Thoth, take the reins */
@@ -1713,7 +1713,7 @@ wiz_show_stats(void)
          total_misc_size, total_misc_count;
 
     win = create_nhwindow(NHW_TEXT);
-    putstr(win, 0, "Current memory statistics:");
+    putstr(win, 0, "現在のメモリ統計:");
 
     total_obj_count = total_obj_size = 0L;
     putstr(win, 0, stats_hdr);
@@ -1861,7 +1861,7 @@ wiz_display_macros(void)
         }
     }
     if (!trouble)
-        putstr(win, 0, "No display macro issues detected.");
+        putstr(win, 0, "表示マクロの問題は検出されなかった.");
     display_nhwindow(win, FALSE);
     destroy_nhwindow(win);
     return ECMD_OK;

@@ -978,7 +978,7 @@ hmon_hitmon_weapon_melee(
                                    50 + 15 * (greatest_erosion(obj)
                                               - greatest_erosion(monwep)),
                                    100))) {
-        static const char from_your_blow[] = " あなたの強烈な一撃だ!";
+        static const char from_your_blow[] = "が強烈な一撃で砕け散った!";
         char buf[BUFSZ];
         /*
          * 2.5% chance of shattering defender's weapon when
@@ -993,16 +993,9 @@ hmon_hitmon_weapon_melee(
         setmnotwielded(mon, monwep);
         mon->weapon_check = NEED_WEAPON;
         if (canseemon(mon))
-            /* Yobjnam2(X,"shatter") yields "Shk's X shatters" if X is owned
-               by a shop or "Mon's X shatters" if X is carried by a monster
-               (or "{Your|The} X shatters" if {carried by hero|last resort})*/
-            Strcpy(buf, Yobjnam2(monwep, "shatter"));
+            Strcpy(buf, Yobjnam2(monwep, (char *) 0));
         else /* hero is blind or can't see invisible mon */
-            /* construct "Its weapon shatters"; not an exact replacement
-               for Yobjnam2() if an unseen mon other than the shopkeeper
-               is wielding a shop-owned weapon; telepathy or extended
-               monster detection will name mon but not its weapon */
-                Sprintf(buf, "%sの武器が砕け散る", Monnam(mon));
+            Sprintf(buf, "%sの武器", Monnam(mon));
         buf[sizeof buf - sizeof from_your_blow] = '\0';
         pline("%s%s", buf, from_your_blow);
         m_useupall(mon, monwep);
@@ -1580,7 +1573,7 @@ hmon_hitmon_stagger(
     if (rnd(100) < P_SKILL(P_BARE_HANDED_COMBAT) && !bigmonst(hmd->mdat)
         && !thick_skinned(hmd->mdat)) {
         if (canspotmon(mon))
-            pline("%sはあなたの強烈な一撃でよろめいた!", Monnam(mon));
+            pline("%sは強烈な一撃でよろめいた!", Monnam(mon));
         if (mhurtle_to_doom(mon, hmd->dmg, &hmd->mdat))
             hmd->already_killed = TRUE;
         hmd->hittxt = TRUE;
@@ -1682,14 +1675,14 @@ hmon_hitmon_msg_silver(
 
     if (canspotmon(mon)) {
         if (hmd->barehand_silver_rings == 1)
-            fmt = "あなたの銀の指輪が%sを焼いた!";
+            fmt = "銀の指輪が%sを焼いた!";
         else if (hmd->barehand_silver_rings == 2)
-            fmt = "あなたの銀の指輪が両方とも%sを焼いた!";
+            fmt = "銀の指輪が両方とも%sを焼いた!";
         else if (hmd->silverobj && hmd->saved_oname[0]) {
             Snprintf(safe_oname, sizeof(safe_oname), "%s", hmd->saved_oname);
             (void) strNsubst(safe_oname, "%", "%%", 0);
             Snprintf(silverobjbuf, sizeof(silverobjbuf),
-                     "あなたの%sが%%sを焼いた!", safe_oname);
+                     "%sが%%sを焼いた!", safe_oname);
             fmt = silverobjbuf;
         } else
             fmt = "銀が%sを焼いた!";
@@ -1721,7 +1714,7 @@ hmon_hitmon_msg_lightobj(
             Snprintf(safe_oname, sizeof(safe_oname), "%s", hmd->saved_oname);
             (void) strNsubst(safe_oname, "%", "%%", 0);
             Snprintf(emitlightobjbuf, sizeof(emitlightobjbuf),
-                     "あなたの%sの輝きが%%sの深部まで貫いた!",
+                     "%sの輝きが%%sの深部まで貫いた!",
                      safe_oname);
             fmt = emitlightobjbuf;
         } else
@@ -2048,7 +2041,7 @@ shade_miss(
         target = youdef ? "you" : mon_nam(mdef);
         if (!thrown) {
             if (youagr)
-                pline("あなたの%sは無害に%sをすり抜けた.", what, target);
+                pline("%sは無害に%sをすり抜けた.", what, target);
             else
                 pline("%sの%sは無害に%sをすり抜けた.",
                       l_monnam(magr), what, target);
@@ -3067,7 +3060,7 @@ mhitm_ad_curs(
                 }
             }
             if (u.umonnum == PM_CLAY_GOLEM) {
-                pline("あなたの頭の文字が消えた!");
+                pline("頭の文字が消えた!");
                 /* KMH -- this is okay with unchanging */
                 rehumanize();
                 return;
@@ -3223,7 +3216,7 @@ mhitm_ad_drin(
             return;
 
         if ((helmet = which_armor(mdef, W_ARMH)) != 0 && rn2(8)) {
-            pline("%sの%sが、あなたの%sへの攻撃を防いだ.",
+            pline("%sの%sが、%sへの攻撃を防いだ.",
                 Monnam(mdef), helm_simple_name(helmet), "頭");
             return;
         }
@@ -3451,7 +3444,7 @@ mhitm_ad_plys(
         if (!rn2(3) && mhm->damage < mdef->mhp
             && !mhitm_mgc_atk_negated(magr, mdef, TRUE)) {
             if (!Blind)
-                pline("%sはあなたの攻撃で凍りついた!", Monnam(mdef));
+                pline("%sは攻撃で凍りついた!", Monnam(mdef));
             paralyze_monst(mdef, rnd(10));
         }
     } else if (mdef == &gy.youmonst) {
@@ -3653,7 +3646,7 @@ mhitm_ad_ench(
                 }
             }
             if (obj && drain_item(obj, FALSE)) {
-                pline("%sの効果が弱まった.", Yobjnam2(obj, "seem"));
+                pline("%sの効果が弱まった.", Yobjnam2(obj, (char *) 0));
             }
         }
     } else {
@@ -4088,7 +4081,7 @@ mhitm_ad_phys(
                     return;
                 if (objects[otmp->otyp].oc_material == SILVER
                     && Hate_silver) {
-                    pline_The("銀はあなたの肉を焼いた!");
+                    pline_The("銀が肉を焼いた!");
                     exercise(A_CON, FALSE);
                 }
                 /* this redundancy necessary because you have
@@ -4461,7 +4454,7 @@ mhitm_ad_legs(
          * still _can_ attack you when you're flying or mounted.
          */
         if ((u.usteed || Levitation || Flying) && !is_flyer(magr->data)) {
-            pline("%sはあなたの%s%sを狙ったが届かなかった!", Monst_name,
+            pline("%sは%s%sを狙ったが届かなかった!", Monst_name,
                   sidestr, leg);
             mhm->damage = 0;
         } else if (magr->mcan) {
@@ -4472,19 +4465,19 @@ mhitm_ad_legs(
             if (uarmf) {
                 if (rn2(2) && (uarmf->otyp == LOW_BOOTS
                                || uarmf->otyp == IRON_SHOES)) {
-                    pline("%sはあなたの露出した%s%sを突いた!",
+                    pline("%sは露出した%s%sを突いた!",
                           Monst_name, sidestr, leg);
                 } else if (!rn2(5)) {
-                    pline("%sはあなたの%sブーツを突き抜けた!", Monst_name,
+                    pline("%sは%sブーツを突き抜けた!", Monst_name,
                           sidestr);
                 } else {
-                    pline("%sはあなたの%sブーツをひっかいた!", Monst_name,
+                    pline("%sは%sブーツをひっかいた!", Monst_name,
                           sidestr);
                     mhm->damage = 0;
                     return;
                 }
             } else
-                pline("%sはあなたの%s%sを突いた!", Monst_name, sidestr, leg);
+                pline("%sは%s%sを突いた!", Monst_name, sidestr, leg);
 
             set_wounded_legs(side, rnd(60 - ACURR(A_DEX)));
             exercise(A_STR, FALSE);
@@ -4908,14 +4901,14 @@ explum(struct monst *mdef, struct attack *mattk)
     switch (mattk->adtyp) {
     case AD_BLND:
         if (mdef && !resists_blnd(mdef)) {
-            pline("%sはあなたの閃光で目がくらんだ!", Monnam(mdef));
+            pline("%sは閃光で目がくらんだ!", Monnam(mdef));
             mdef->mblinded = min((int) mdef->mblinded + tmp, 127);
             mdef->mcansee = 0;
         }
         break;
     case AD_HALU:
         if (mdef && haseyes(mdef->data) && mdef->mcansee) {
-            pline("%sはあなたの閃光で混乱した!", Monnam(mdef));
+            pline("%sは閃光で混乱した!", Monnam(mdef));
             mdef->mconf = 1;
         }
         break;
@@ -6036,7 +6029,7 @@ passive(
                     break;
                 }
                 if (mon->mcansee) {
-                    if (ureflects("%sの視線はあなたの%sで反射された.",
+                    if (ureflects("%sの視線は%sで反射された.",
                                   l_monnam(mon))) {
                         ;
                     } else if (Hallucination && rn2(4)) {
@@ -6192,7 +6185,7 @@ passive_obj(
         if (!mon->mcan) {
             if (drain_item(obj, TRUE) && carried(obj)
                 && (obj->known || obj->oclass == ARMOR_CLASS)) {
-                pline("%sの効果が弱まった.", Yobjnam2(obj, "seem"));
+                pline("%sの効果が弱まった.", Yobjnam2(obj, (char *) 0));
             }
             break;
         }

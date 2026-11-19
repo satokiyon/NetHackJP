@@ -293,7 +293,7 @@ flooreffects(
                 Soundeffect(se_item_tumble_downwards, 50);
                 You_hear("%sが落ちていくのが聞こえた.", xname(obj));
             } else {
-                pline("%sが%sの落とし穴へ転がり落ちた.", xname(obj),
+                pline("%sが%s落とし穴へ転がり落ちた.", xname(obj),
                       the_your[t->madeby_u]);
             }
         } else if (ship_object(obj, x, y, FALSE)) {
@@ -676,7 +676,7 @@ canletgo(struct obj *obj, const char *word)
         if (*word) {
             const char *hand = jp_body_part(HAND);
 
-            Norep("あなたの%sに溶接された%sを%sことはできない.", hand, something,
+            Norep("%sに溶接された%sを%sことはできない.", hand, something,
                   action_jp);
         }
         return FALSE;
@@ -705,7 +705,7 @@ canletgo(struct obj *obj, const char *word)
     }
     if (obj->otyp == LEASH && obj->leashmon != 0) {
         if (*word)
-            pline_The("綱があなたの%sに結ばれている.", jp_body_part(HAND));
+            pline_The("綱が%sに結ばれている.", jp_body_part(HAND));
         return FALSE;
     }
     if (obj->owornmask & W_SADDLE) {
@@ -1599,7 +1599,7 @@ goto_level(
      * (s)he has been given the go-ahead by the leader.
      */
     if (on_level(&u.uz, &qstart_level) && !newdungeon && !ok_to_quest()) {
-        pline("謎の力があなたの下降を阻んだ.");
+        pline("謎の力が下降を阻んだ.");
         return;
     }
 
@@ -2173,7 +2173,7 @@ revive_corpse(struct obj *corpse)
         switch (where) {
         case OBJ_INVENT:
             if (is_uwep)
-                pline_The("%sがあなたの手からうねって抜け出した!", cname);
+                pline_The("%sが手からうねって抜け出した!", cname);
             else
                 You_feel("バックパックの中で何かがもぞもぞ動いている!");
             break;

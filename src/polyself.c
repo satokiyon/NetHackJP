@@ -1243,11 +1243,11 @@ break_armor(void)
                 (void) Cloak_off();
                 useup(otmp);
             } else if (otmp->otyp == ALCHEMY_SMOCK) {
-                pline_The("あなたの%sの結び目はほどけた!", cloak_simple_name(otmp));
+                pline_The("%sの結び目はほどけた!", cloak_simple_name(otmp));
                 (void) Cloak_off();
                 dropp(otmp);
             } else {
-                pline_The("あなたの%sの留め金が外れた!", cloak_simple_name(otmp));
+                pline_The("%sの留め金が外れた!", cloak_simple_name(otmp));
                 (void) Cloak_off();
                 dropp(otmp);
             }
@@ -1878,7 +1878,7 @@ dohide(void)
         if (IS_FOUNTAIN(levl[u.ux][u.uy].typ))
             pline_The("噴水は身を隠すには浅すぎた.");
         else
-            There("には身を隠せる%sがない.", hliquid("water"));
+            There("は身を隠せる%sがない.", hliquid("water"));
         u.uundetected = 0;
         return ECMD_OK;
     }
@@ -1887,7 +1887,7 @@ dohide(void)
         struct obj *otmp, *otop = svl.level.objects[u.ux][u.uy];
 
         if (!otop) {
-            There("には下に隠れるものがない.");
+            There("は下に隠れるものがない.");
             u.uundetected = 0;
             return ECMD_OK;
         }
@@ -1920,13 +1920,13 @@ dohide(void)
     }
     /* Planes of Air and Water */
     if (on_ceiling && !has_ceiling(&u.uz)) {
-        There("にはあなたの上に隠れる場所がない.");
+        pline("あなたの上に隠れる場所がない.");
         u.uundetected = 0;
         return ECMD_OK;
     }
     if ((is_hider(gy.youmonst.data) && !Flying) /* floor hider */
         && (Is_airlevel(&u.uz) || Is_waterlevel(&u.uz))) {
-        There("にはあなたの下に隠れる場所がない.");
+        pline("あなたの下に隠れる場所がない.");
         u.uundetected = 0;
         return ECMD_OK;
     }

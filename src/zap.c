@@ -3336,7 +3336,7 @@ zap_updown(struct obj *obj) /* wand or spell, nonnull */
                    && !Is_qstart(&u.uz)) {
             int dmg;
             /* similar to zap_dig() */
-            pline("岩が%sから崩れ、あなたの%sに落ちた",
+            pline("岩が%sから崩れ、%sに落ちた",
                   ceiling(x, y), jp_body_part(HEAD));
             dmg = rnd(hard_helmet(uarmh) ? 2 : 6);
             losehp(Maybe_Half_Phys(dmg), "falling rock", KILLED_BY_AN);
@@ -3384,7 +3384,7 @@ zap_updown(struct obj *obj) /* wand or spell, nonnull */
             || (Is_qstart(&u.uz) && u.dz < 0)) {
             pline1(nothing_happens);
         } else if (u.dz < 0) { /* we should do more... */
-            pline("血があなたの%sに滴り落ちた.", jp_body_part(FACE));
+            pline("血が%sに滴り落ちた.", jp_body_part(FACE));
         } else if (u.dz > 0 && !OBJ_AT(u.ux, u.uy)) {
             /*
             Print this message only if there wasn't an engraving
@@ -3398,7 +3398,7 @@ zap_updown(struct obj *obj) /* wand or spell, nonnull */
                     pline("%s血があなたの下で渦巻いた.",
                           is_lava(u.ux, u.uy) ? "沸騰した" : "流れた");
                 else
-                    pline("%s血があなたの%sにたまった.",
+                    pline("%s血が%sにたまった.",
                           is_lava(u.ux, u.uy) ? "沸騰した" : "流れた",
                           jp_body_part_plural(FOOT));
             }
@@ -4920,7 +4920,7 @@ dobuzz(
                         if (canseemon(mon)) {
                             hit(flash_str(fltyp, FALSE), mon, ".");
                             pline("%sは分解した.", l_monnam(mon));
-                            pline("%sの体があなたの%sの前で再構成された!",
+                            pline("%sの体が%sの前で再構成された!",
                                   Monnam(mon),
                                   (eyecount(gy.youmonst.data) == 1)
                                       ? jp_body_part(EYE)
@@ -4996,7 +4996,7 @@ dobuzz(
                           The(flash_str(fltyp, FALSE)));
                 if (Reflecting) {
                     if (!Blind) {
-                        (void) ureflects("しかし%sはあなたの%sで跳ね返った!",
+                        (void) ureflects("しかし%sは%sで跳ね返った!",
                                          "それ");
                     } else
                     pline("なぜか影響を受けなかった.");
@@ -5433,7 +5433,7 @@ zap_over_floor(
         newsym(x, y);
         if (see_it)
             pline("%s%sで隠し扉が現れた.",
-                  yourzap ? "あなたの" : "その", zapverb);
+                  "", zapverb);
         else if (Is_rogue_level(&u.uz))
             draft_message(FALSE); /* "You feel a draft." (open doorway) */
     }
@@ -5486,7 +5486,7 @@ zap_over_floor(
                 if (exploding_wand_typ)
                     pline_The("扉は無事だった.");
                 else
-                    pline_The("扉は%s%sを吸収した!", yourzap ? "あなたの" : "その",
+                    pline_The("扉は%s%sを吸収した!", "",
                               zapverb);
             } else
                 You_feel("振動を感じた.");
@@ -5788,7 +5788,7 @@ item_what(int dmgtyp)
         /* format the output to be ready for enl_msg() to append it to
            "Your items {are,were} protected against <damage-type>" */
         if (what)
-            Sprintf(whatbuf, "（あなたの%sによる）", what);
+            Sprintf(whatbuf, "（%sによる）", what);
     }
     return whatbuf;
 }

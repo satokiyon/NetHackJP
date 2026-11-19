@@ -582,7 +582,7 @@ doread(void)
         if ((otyp == T_SHIRT || otyp == HAWAIIAN_SHIRT) && uarm
             && scroll == uarmu) {
             pline("%s%sは、上に着ている%sに隠れていて読めない.",
-                  scroll->unpaid ? "その" : "あなたの",
+                  scroll->unpaid ? "未払いの" : "",
                   xname(scroll), xname(uarm));
             return ECMD_OK;
         }
@@ -633,10 +633,10 @@ doread(void)
             return ECMD_OK;
         }
           if (!Blind)
-            pline("その%sには%sと書かれている。",
+            pline("%sには%sと書かれている.",
                 simpleonames(scroll), cap_text);
           else
-            pline("その%sに文字があるのを感じた。%sと読めるようだ。",
+            pline("%sに文字があるのを感じた.%sと読めるようだ.",
                 simpleonames(scroll), cap_text);
         if (!u.uconduct.literate++)
             livelog_printf(LL_CONDUCT, "%sを読むことで、読み書きができるようになった",
@@ -1333,8 +1333,8 @@ seffect_enchant_armor(struct obj **sobjp)
 
     if (!otmp) {
         strange_feeling(sobj, !Blind
-                        ? "あなたの肌は一瞬光ってすぐ消えた."
-                        : "あなたの肌は一瞬あたたかくなった.");
+                        ? "肌が一瞬光ってすぐ消えた."
+                        : "肌が一瞬あたたかくなった.");
         *sobjp = 0; /* useup() in strange_feeling() */
         exercise(A_CON, !scursed);
         exercise(A_STR, !scursed);
@@ -1631,10 +1631,10 @@ seffect_confuse_monster(struct obj **sobjp)
             make_confused(HConfusion + rnd(100), FALSE);
         } else {
             if (altfeedback)
-                pline("あなたの%sの周囲にかすかなざわめきが広がった.",
+                pline("%sの周囲にかすかなざわめきが広がった.",
                       jp_body_part(HEAD));
             else
-                pline("あなたの%sの周囲に%s色の輝きが広がった.",
+                pline("%sの周囲に%s色の輝きが広がった.",
                       jp_body_part(HEAD), hcolor(NH_RED));
             make_confused(0L, TRUE);
         }
@@ -1991,7 +1991,7 @@ seffect_light(struct obj **sobjp)
                 }
             }
             if (sawlights) {
-                pline("光があなたの周囲に現れた!");
+                pline("周囲に光が現れた!");
                 gk.known = TRUE;
             }
         }
@@ -2081,27 +2081,27 @@ seffect_fire(struct obj **sobjp)
         (void) learnscrolltyp(SCR_FIRE);
     if (confused) {
         if (Underwater) {
-            pline("あなたの周囲の水が少し蒸発した.");
+            pline("周囲の水が少し蒸発した.");
         }
         else if (Fire_resistance) {
             shieldeff(u.ux, u.uy);
             monstseesu(M_SEEN_FIRE);
             if (!Blind)
-                pline("おや、あなたの%sにきれいな炎が見える.",
+                pline("おや、%sにきれいな炎が見える.",
                       jp_body_part_plural(HAND));
             else
                 You_feel("%sに心地よいぬくもりを感じた.",
                          jp_body_part_plural(HAND));
         } else {
             monstunseesu(M_SEEN_FIRE);
-            pline_The("巻物は燃え上がり、あなたの%sが焼けた.",
+            pline_The("巻物は燃え上がり、%sが焼けた.",
                       jp_body_part_plural(HAND));
             losehp(1, "scroll of fire", KILLED_BY_AN);
         }
         return;
     }
     if (Underwater) {
-        pline_The("%sがあなたの周囲で激しく気化した!", hliquid("water"));
+        pline_The("%sが周囲で激しく気化した!", hliquid("water"));
     } else {
         if (sblessed) {
             if (!already_known)
@@ -2147,7 +2147,7 @@ seffect_earth(struct obj **sobjp)
             You_hear("地鳴りが聞こえる.");
         } else {
             if (!avoid_ceiling(&u.uz)) {
-                pline_The("%sがあなたの%sで鳴り響いた!", ceiling(u.ux, u.uy),
+                pline_The("%sが%sに鳴り響いた!", ceiling(u.ux, u.uy),
                           sblessed ? "周囲" : "頭上");
             } else {
                 pline("%sが%sから%sのように降ってきた!",
@@ -2348,7 +2348,7 @@ seffect_magic_mapping(struct obj **sobjp)
         make_confused(HConfusion + rnd(30), FALSE);
         return;
     }
-    pline("地図があなたの脳裏に浮かび上がった!");
+    pline("地図が脳裏に浮かび上がった!");
     cval = (scursed && !confused);
     if (cval)
         HConfusion = 1; /* to screw up map */
@@ -2570,7 +2570,7 @@ drop_boulder_on_monster(coordxy x, coordxy y, boolean confused, boolean byu)
             if (mtmp->minvis && !canspotmon(mtmp))
                 map_invisible(mtmp->mx, mtmp->my);
         } else if (engulfing_u(mtmp))
-            You_hear("何かが%sの%s越しにあなたの%sへぶつかる音が聞こえる!",
+            You_hear("何かが%sの%s越しに%sへぶつかる音が聞こえる!",
                      mon_nam(mtmp), jp_mbodypart(mtmp, STOMACH),
                      jp_body_part(HEAD));
 

@@ -3850,8 +3850,8 @@ tipcontainer(struct obj *box) /* or bag */
                                  "中身をぶちまけることで軽量化の袋を爆発させてしまった");
                     /* explicitly mention what item is triggering explosion */
                     urgent_pline(
-                   "%sが中へ%s込んだ瞬間、魔法の爆発に巻き込まれた!",
-                                 doname(otmp), otense(otmp, "tumble"));
+                   "%sが中へ転がり込んだ瞬間、魔法の爆発に巻き込まれた!",
+                                 doname(otmp));
 
                     /* if putting one bag of holding into another, first
                        blow up the one going in, then (below) blow up the

@@ -173,7 +173,7 @@ cursed_book(struct obj *bp)
             shieldeff(u.ux, u.uy);
             pline_The("本は爆発したが、あなたは無傷だった!");
         } else {
-            pline("本を読んでいると、それはあなたの顔の前で爆発した!");
+            pline("本を読んでいると、顔の前で爆発した!");
             dmg = 2 * rnd(10) + 5;
             losehp(Maybe_Half_Phys(dmg), "exploding rune", KILLED_BY_AN);
         }

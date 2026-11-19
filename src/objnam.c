@@ -2954,7 +2954,8 @@ paydoname(struct obj *obj)
                 p += 2;
             else if (!strncmp(p, "an ", 3))
                 p += 3;
-            p = strprepend(p, obj->unpaid ? "未払いの" : "あなたの");
+            if (obj->unpaid)
+                p = strprepend(p, "未払いの");
         }
 
         if (!obj->cknown) {

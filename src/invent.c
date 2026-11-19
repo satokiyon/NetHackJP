@@ -5731,7 +5731,7 @@ display_binventory(coordxy x, coordxy y, boolean as_if_seen)
             /* "pair of boots" is singular but "beneath it" sounds strange */
             if (pair_of(obj))
                 more_than_1 = TRUE;
-            underwhat = more_than_1 ? "その下" : "それの下";
+            underwhat = "その下";
         } else {
             Sprintf(qbuf, "%sの下にある品物:", seen_liquid);
             if (query_objlist(qbuf, &svl.level.objects[x][y], BY_NEXTHERE,

@@ -98,7 +98,7 @@ mkcavearea(boolean rockit)
         Soundeffect(se_crashing_rock, 100);
         pline("ガラガラ!  頭上の天井が崩れてきた!");
     } else {
-        pline("不思議な力があなたの周りに洞窟を%s!",
+        pline("不思議な力が周囲に洞窟を%s!",
               (levl[u.ux][u.uy].typ == CORR) ? "作り出した" : "広げた");
     }
     display_nhwindow(WIN_MESSAGE, TRUE);
@@ -1209,9 +1209,9 @@ use_pick_axe2(struct obj *obj)
             if (trap && trap->ttyp == WEB) {
                 if (!trap->tseen) {
                     seetrap(trap);
-                    There("そこにクモの巣がある!");
+                    There("クモの巣がある!");
                 }
-                pline("%sがクモの巣に絡まった.", Yobjnam2(obj, "become"));
+                pline("%sがクモの巣に絡まった.", Yobjnam2(obj, (char *) 0));
                 /* you ought to be able to let go; tough luck */
                 /* (maybe `move_into_trap()' would be better) */
                 nomul(-d(2, 2));
@@ -2156,8 +2156,8 @@ rot_corpse(anything *arg, long timeout)
         if (flags.verbose) {
             char *cname = jp_corpse_xname(obj, (const char *) 0, CXN_NO_PFX);
 
-            Your("%s%sは腐って%s%c", obj == uwep ? "構えていた" : "", cname,
-                 otense(obj, "なくなった"), obj == uwep ? '!' : '.');
+            Your("%s%sは腐ってなくなった%c", obj == uwep ? "構えていた" : "", cname,
+                 obj == uwep ? '!' : '.');
         }
         if (obj->owornmask) {
             remove_worn_item(obj, TRUE);

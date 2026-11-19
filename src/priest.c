@@ -333,8 +333,7 @@ priestname(
                   || !Is_astralevel(&u.uz)
                   || m_next2u(mon) || program_state.gameover);
 
-    if (article == ARTICLE_YOUR)
-        Strcat(pname, show_deity ? "あなたの、" : "あなたの");
+    nhUse(article);
 
     if (show_deity) {
         Strcat(pname, jp_gname_for_display(halu_gname(mon_aligntyp(mon))));

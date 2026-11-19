@@ -928,11 +928,11 @@ mon_wield_item(struct monst *mon)
                 const char *mon_hand = jp_mbodypart(mon, HAND);
 
                 /* bimanual(mw_tmp) の場合でも日本語では複数形（sの付加など）は不要 */
-                Sprintf(welded_buf, "その%sにくっついている", mon_hand);
+                Sprintf(welded_buf, "%sにくっついている", mon_hand);
 
                 if (obj->otyp == PICK_AXE) {
                     pline("だが、%sの武器は%sので、", mon_nam(mon), welded_buf);
-                    pline("%sはその%sを装備できない.", mon_nam(mon),
+                    pline("%sは%sを装備できない.", mon_nam(mon),
                           xname(obj));
                 } else {
                     pline_mon(mon, "%sは%sを装備しようとした.", Monnam(mon), doname(obj));

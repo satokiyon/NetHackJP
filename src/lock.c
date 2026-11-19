@@ -526,7 +526,7 @@ pick_lock(
         }
         if (c != 'y') {
             if (!count)
-                There("ここには鍵の類はなさそうだった.");
+                pline("ここには鍵の類はなさそうだった.");
             return PICKLOCK_LEARNED_SOMETHING; /* decided against all boxes */
         }
 
@@ -709,7 +709,7 @@ doforce(void)
                    since we're about to set lknown, there's no need to
                    remember and then reset its current value */
                 otmp->lknown = 0;
-                    There("ここに%sがあったが、%s.",
+                    pline("ここに%sがあったが、%s.",
                         doname(otmp), otmp->obroken ? "その鍵は既に壊れていた" : "既に鍵は開いていた");
                 otmp->lknown = 1;
                 continue;

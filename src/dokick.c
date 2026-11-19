@@ -171,7 +171,7 @@ kick_monster(struct monst *mon, coordxy x, coordxy y)
             map_invisible(x, y);
         else
             newsym(x, y);
-          There("ここに%sがいた.",
+          pline("ここに%sがいた.",
               canspotmon(mon) ? a_monnam(mon) : "隠れている何か");
     }
 
@@ -1601,7 +1601,7 @@ impact_drop(
                 dct == oct ? "すべての" : dct == 1L ? "ほかの1つの" : "ほかの", gate);
         else if (oct == dct)
             pline("隣接する%s物体が%s落ちた.",
-                dct == 1L ? "その" : "すべての", gate);
+                dct == 1L ? "" : "すべての", gate);
         else
             pline("隣接する%s物体が%s落ちた.",
                 dct == 1L ? "いずれか1つの" : "いくつかの", gate);

@@ -1320,11 +1320,11 @@ check_credit(long  tmp, struct monst *shkp)
     if (credit == 0L) {
         ; /* nothing to do; just 'return tmp;' */
     } else if (credit >= tmp) {
-        pline_The("代金はあなたの信用枠から差し引かれた.");
+        pline_The("代金は信用枠から差し引かれた.");
         ESHK(shkp)->credit -= tmp;
         tmp = 0L;
     } else {
-        pline_The("代金はあなたの信用枠で一部相殺された.");
+        pline_The("代金は信用枠で一部相殺された.");
         ESHK(shkp)->credit = 0L;
         tmp -= credit;
     }
@@ -1820,7 +1820,7 @@ dopay(void)
     }
 
     if ((!sk && (!Blind || Blind_telepat)) || (!Blind && !seensk)) {
-        There("には支払いを受け取る店主がいないようだ.");
+        There("は支払いを受け取る店主がいないようだ.");
         return ECMD_OK;
     }
 
@@ -1875,7 +1875,7 @@ dopay(void)
             return ECMD_OK;
         }
         if (!mtmp) {
-            There("には支払いを受け取る者がいない.");
+            There("は支払いを受け取る者がいない.");
             return ECMD_OK;
         }
         if (!mtmp->isshk) {
@@ -4175,9 +4175,9 @@ sellobj(
                     jp_shkname_for_display(shkp), short_funds ? "手持ちの都合で" : "", offer,
                     currency(offer),
                     (cltmp && !ltmp)
-                        ? ((yourc == 1L) ? "あなたの容器内の品" : "あなたの容器内の品々")
+                        ? ((yourc == 1L) ? "容器内の品" : "容器内の品々")
                         : "",
-                    obj->unpaid ? "その" : "あなたの");
+                    obj->unpaid ? "未払いの" : "");
             one = !ltmp ? (yourc == 1L) : (obj->quan == 1L && !cltmp);
             Sprintf(qsfx, "%sを買い取ると言っている。%sを売るか?",
                     (cltmp && ltmp)
@@ -4796,7 +4796,7 @@ repair_damage(
                 if (canseemon(shkp) && dist2(x, y, shkp->mx, shkp->my) <= 2)
                     pline("%sは%sを罠から外した。", jp_shkname_for_display(shkp), ansimpleoname(otmp));
                 else if (ttmp->tseen && cansee(ttmp->tx, ttmp->ty))
-                    pline("その%sは消える。",
+                    pline("%sは消える.",
                           jp_trapname_for_display(ttmp->ttyp, TRUE));
             }
             (void) mpickobj(shkp, otmp);
@@ -4805,12 +4805,12 @@ repair_damage(
         case PIT:
         case SPIKED_PIT:
             if (!catchup && ttmp->tseen && cansee(ttmp->tx, ttmp->ty))
-                pline("その%sは塞がった。",
+                pline("%sは塞がった.",
                       jp_trapname_for_display(ttmp->ttyp, TRUE));
             break;
         default:
             if (!catchup && ttmp->tseen && cansee(ttmp->tx, ttmp->ty))
-                pline("その%sは消える。",
+                pline("%sは消える.",
                       jp_trapname_for_display(ttmp->ttyp, TRUE));
             break;
         }
@@ -5118,10 +5118,10 @@ shopdig(int fall)
                 rile_shk(shkp);
                 return;
             } else
-                pline("%sは飛びかかってあなたのバックパックを掴んだ!",
+                pline("%sは飛びかかってバックパックを掴んだ!",
                       jp_shkname_for_display(shkp));
         } else
-            pline("%sはあなたのバックパックを掴んだ!",
+            pline("%sはバックパックを掴んだ!",
                   jp_shkname_for_display(shkp));
 
         for (obj = gi.invent; obj; obj = obj2) {
@@ -5884,7 +5884,7 @@ block_entry(coordxy x, coordxy y)
     return FALSE;
 }
 
-/* "あなたの" or "店主の" or "ゴブリンの" (末尾スペースなし) */
+/* "" (所持品) or "店主の" or "ゴブリンの" (末尾スペースなし) */
 char *
 shk_your(char *buf, struct obj *obj)
 {
@@ -5896,7 +5896,7 @@ shk_your(char *buf, struct obj *obj)
     else if (chk_pm && the_unique_pm(&mons[obj->corpsenm]))
         return buf;
     else if (!shk_owns(buf, obj) && !mon_owns(buf, obj)) {
-        Strcpy(buf, carried(obj) ? "あなたの" : "");
+        buf[0] = '\0';
     }
     return buf;
 }

@@ -633,7 +633,7 @@ god_zaps_you(aligntyp resp_god)
             if (Blind)
                 pline("なぜか影響を受けなかった.");
             else
-                (void) ureflects("しかし%sはあなたの%sで跳ね返った!", "雷");
+                (void) ureflects("しかし%sは%sで跳ね返った!", "雷");
             monstseesu(M_SEEN_REFL);
         } else if (Shock_resistance) {
             shieldeff(u.ux, u.uy);
@@ -797,7 +797,7 @@ at_your_feet(const char *str)
         pline("%sは%sの%sへ落ちていった.",
               str, mon_nam(u.ustuck), jp_mbodypart(u.ustuck, STOMACH));
     } else {
-        pline("%sはあなたの%s%sに現れた!", str,
+        pline("%sは%s%sに現れた!", str,
               jp_body_part_plural(FOOT), Levitation ? "の下" : "元");
     }
 }
@@ -1532,7 +1532,7 @@ staticfn void
 offer_real_amulet(struct obj *otmp, aligntyp altaralign)
 {
     static NEARDATA const char
-        cloud_of_smoke[] = "%s色の煙があなたの周囲を取り囲んだ...";
+        cloud_of_smoke[] = "%s色の煙が周囲を取り囲んだ...";
 
     /* The final Test.  Did you win? */
     if (uamul == otmp)

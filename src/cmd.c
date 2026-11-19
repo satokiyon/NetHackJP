@@ -932,7 +932,7 @@ domonability(void)
                magical breathing */
             (void) split_mon(&gy.youmonst, (struct monst *) 0);
         } else {
-            There("ここに泉はなかった.");
+            pline("ここに泉はなかった.");
         }
     } else if (is_unicorn(uptr)) {
         use_unicorn_horn((struct obj **) 0);
@@ -1000,18 +1000,18 @@ makemap_prepost(boolean pre, boolean wiztower)
         makemap_remove_mons();
         rm_mapseen(ledger_no(&u.uz)); /* discard overview info for level */
         {
-            static const char Unachieve[] = "%s achievement が取り消された.";
+            static const char Unachieve[] = "%sの実績が取り消された.";
 
             /* achievement tracking; if replacing a level that has a
                special prize, lose credit for previously finding it and
                reset for the new instance of that prize */
             if (Is_mineend_level(&u.uz)) {
                 if (remove_achievement(ACH_MINE_PRIZE))
-                    pline(Unachieve, "Mine's-end");
+                    pline(Unachieve, "鉱山の最深部");
                 svc.context.achieveo.mines_prize_oid = 0;
             } else if (Is_sokoend_level(&u.uz)) {
                 if (remove_achievement(ACH_SOKO_PRIZE))
-                    pline(Unachieve, "Soko-prize");
+                    pline(Unachieve, "倉庫番の報酬");
                 svc.context.achieveo.soko_prize_oid = 0;
             }
         }
@@ -2638,7 +2638,7 @@ bind_mousebtn(int btn, const char *command)
     struct ext_func_tab *extcmd;
 
     if (btn < 1 || btn > NUM_MOUSE_BUTTONS) {
-        config_error_add("Wrong mouse button, valid are 1-%i",
+        config_error_add("不正なマウスボタンです。有効な範囲は 1-%i です",
                          NUM_MOUSE_BUTTONS);
         return FALSE;
     }
@@ -2707,13 +2707,13 @@ bind_key(uchar key, const char *command, boolean user)
 
         if ((extcmd->flags & CMD_PARAM) != 0) {
             if (!p) {
-                config_error_add("'%s' requires a parameter", buf);
+                config_error_add("'%s' にはパラメータが必要です", buf);
             } else {
                 struct Cmd_bind *bind = cmdbind_get(key);
                 int maxlen = min(30, strlen(p)) + 1;
 
                 if (maxlen <= 1) {
-                    config_error_add("Required parameter cannot be empty");
+                    config_error_add("必須のパラメータが空です");
                 } else {
                     bind->param = (char *) alloc(maxlen);
                     (void) strncpy(bind->param, p, maxlen);
@@ -2721,7 +2721,7 @@ bind_key(uchar key, const char *command, boolean user)
                 }
             }
         } else if (p && strlen(p) > 0)
-            config_error_add("'%s' does not take a parameter", buf);
+            config_error_add("'%s' はパラメータを取りません", buf);
 
 #if 0 /* silently accept key binding for unavailable command (!SHELL,&c) */
         if ((extcmd->flags & CMD_NOT_AVAILABLE) != 0) {

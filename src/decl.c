@@ -68,7 +68,7 @@ const struct c_common_strings c_common_strings =
             "再び動けるようになった.",
             "やめておこう.",
             "視界はすぐに晴れた.",
-      { "", "あなたの" },
+      { "", "自分で仕掛けた" },
       { "mon", "you" }
 };
 

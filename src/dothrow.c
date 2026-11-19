@@ -1288,7 +1288,7 @@ toss_up(struct obj *obj, boolean hitsroof)
     } else {
         action = "かすめ";
     }
-    pline("%sは%sを%s、あなたの%sの上に落ちてきた.", Doname2(obj),
+    pline("%sは%sを%s、%sの上に落ちてきた.", Doname2(obj),
           action, ceiling(u.ux, u.uy), jp_body_part(HEAD));
 
     /* object now hits you */
@@ -1731,7 +1731,7 @@ throwit(
                we're about to return */
             if (tethered_weapon) {
                 if (!tether_released_msg) {
-                    pline("紐があなたの%sからはずれた.",
+                    pline("紐が%sから外れた.",
                            jp_body_part(ARM));
                     tether_released_msg = TRUE;
                 }
@@ -1751,7 +1751,7 @@ throwit(
         /* missile has already been handled */
         if (tethered_weapon) {
             if (!tether_released_msg) {
-                pline("紐があなたの%sからはずれた.",
+                pline("紐が%sから外れた.",
                        jp_body_part(ARM));
                 tether_released_msg = TRUE;
             }
@@ -1801,29 +1801,29 @@ throwit(
                         if (tethered_weapon) {
                             /* Blind mods unnecessary; you know what you threw,
                              * and it is tethered to your arm */
-                            pline("紐のついた%sが戻ってきたが、紐があなたの%sから滑り落ちた.",
+                            pline("紐のついた%sが戻ってきたが、紐が%sから滑り落ちた.",
                                   xname(obj), jp_body_part(ARM));
                             tether_released_msg = TRUE;
                         } else {
                             if (Blind)
-                                pline("%sがあなたの%sの%sに落ちた.",
+                                pline("%sが%sの%sに落ちた.",
                                       Something, jp_body_part_plural(FOOT),
                                       Levitation ? "下" : "ところ");
                             else
-                                pline("%sが戻ってきて、あなたの%sの%sに落ちた.",
+                                pline("%sが戻ってきて、%sの%sに落ちた.",
                                       Doname2(obj), jp_body_part_plural(FOOT),
                                       Levitation ? "下" : "ところ");
                         }
                     } else {
                         dmg += rnd(3);
                         if (tethered_weapon) {
-                            Your("紐のついた%sが戻ってきてあなたの%sに当たった!",
+                            Your("紐のついた%sが戻ってきて%sに当たった!",
                                  xname(obj), jp_body_part(ARM));
                         } else {
                             pline(
                                 Blind
-                                    ? "%sがあなたの%sに当たった!"
-                                    : "%sが戻ってきてあなたの%sに当たった!",
+                                    ? "%sが%sに当たった!"
+                                    : "%sが戻ってきて%sに当たった!",
                                 Blind ? Something : Doname2(obj),
                                 jp_body_part(ARM));
                         }
@@ -1842,7 +1842,7 @@ throwit(
                             dropy(obj);
                     } else {
                         if (!tether_released_msg) {
-                            pline("%sの紐があなたの%sからはずれた.",
+                            pline("%sの紐が%sから外れた.",
                                   xname(obj), jp_body_part(ARM));
                             tether_released_msg = TRUE;
                         }
@@ -1853,7 +1853,7 @@ throwit(
             } else {
                 if (tethered_weapon) {
                    if (!tether_released_msg) {
-                       pline("紐があなたの%sからはずれた.",
+                       pline("紐が%sから外れた.",
                               jp_body_part(ARM));
                        tether_released_msg = TRUE;
                    }
@@ -2778,7 +2778,7 @@ throw_gold(struct obj *obj)
     if (u.dz) {
         if (u.dz < 0 && !Is_airlevel(&u.uz) && !Underwater
             && !Is_waterlevel(&u.uz)) {
-            pline_The("金貨は%sに当たり、あなたの%sの上へ落ちてきた.",
+            pline_The("金貨は%sに当たり、%sの上へ落ちてきた.",
                       ceiling(u.ux, u.uy), jp_body_part(HEAD));
             /* some self damage? */
             if (uarmh)

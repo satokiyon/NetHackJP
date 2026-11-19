@@ -99,11 +99,11 @@ morgue_mon_sound(struct monst *mtmp)
             You("不自然なほど静かなことに突然気づいた.");
             break;
         case 1:
-            pline_The("あなたの%sの後ろの%sが逆立った.", jp_body_part(NECK),
+            pline_The("%sの後ろの%sが逆立った.", jp_body_part(NECK),
                       hair);
             break;
         case 2:
-            pline_The("あなたの%sの%sが逆立っているようだ.",
+            pline_The("%sの%sが逆立っているようだ.",
                       jp_body_part(HEAD), hair);
             break;
         }
