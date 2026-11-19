@@ -10,7 +10,7 @@
 ## 関連ドキュメント（詳細リファレンス）
 
 - 設計・独自拡張一覧: `DEVELOPMENT.md`（特に §4）
-- 翻訳ガイドライン・安全チェックリスト: `docs/translation-instructions-ja.md` / `docs/message-translation-safety-checklist.md`
+- 翻訳ガイドライン: `docs/translation-instructions-ja.md`
 - 翻訳作業スキル: `.github/skills/nethackjp-message-translation/SKILL.md`
 - X11 XIM 詳細: `XIM-IMPLEMENTATION-PLAN.md`
 
@@ -61,8 +61,8 @@
   - `getcchar()` の第 2 引数 `wch` に `NULL` を渡さないこと（PDCursesMod で `color_pair` が未初期化になる）。非 NULL バッファと初期化した `color_pair` を渡すこと。
   - `win/tty/` で生の `putchar()` / `fputs(..., stdout)` を使わず、`g_putch()` / `g_pututf8()` に統一すること（`WIN32CON` での CP437 文字化け防止）。
   - 文字幅計算は `tty_utf8_char_width()`（ロケール非依存の East Asian Width 判定）に一本化し、`wcwidth` / `mbrtowc` を使わないこと。POSIX TTY の `tgetch()` 入力は二重エンコードを避け、UTF-8 1 文字分が揃ってからエコーすること。
-- **X11 (XIM)**: `#ifdef HAVE_XIM` で囲むこと。`XOpenIM` 失敗時や `OPTIONS=use_xim:off` 時は ASCII（`XLookupString`）へフォールバックし、`XIMPreeditNothing | XIMStatusNothing` を使うこと。マップ画面・yn プロンプトは ASCII のみ（詳細は `DEVELOPMENT.md §4.11` / `XIM-IMPLEMENTATION-PLAN.md`）。
-- **Qt6**: `win/Qt/` で新規に `QString::fromLatin1` / `toLatin1` を書かず UTF-8 を使うこと。マップ画面・yn プロンプトは ASCII のみを維持し、日本語化済み静的ラベルおよびコア日本語表示関数を維持すること（詳細は `DEVELOPMENT.md §4.18〜4.19`）。
+- **X11 (XIM)**: `#ifdef HAVE_XIM` で囲むこと。`XOpenIM` 失敗時や `OPTIONS=use_xim:off` 時は ASCII（`XLookupString`）へフォールバックし、`XIMPreeditNothing | XIMStatusNothing` を使うこと。マップ画面・yn プロンプトは ASCII のみ（詳細は `DEVELOPMENT.md §4.15〜4.16` / `XIM-IMPLEMENTATION-PLAN.md`）。
+- **Qt6**: `win/Qt/` で新規に `QString::fromLatin1` / `toLatin1` を書かず UTF-8 を使うこと。マップ画面・yn プロンプトは ASCII のみを維持し、日本語化済み静的ラベルおよびコア日本語表示関数を維持すること（詳細は `DEVELOPMENT.md §4.21〜4.24`）。
 - **タイル定義（`win/share/*.txt`）**: ヘッダー注釈・コメント行は必ず行頭 `#` で始めること（`#` がないとカラーパレットと誤判定され全タイルがスキップされる）。
 
 ## 5. Lua ファイルの構文保護と検証

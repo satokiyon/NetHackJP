@@ -76,7 +76,5 @@ wsl -d Ubuntu-26.04 -- bash -lc "cd /mnt/c/Users/satok/NetHackJP && ./sys/unix/b
 
 ## Notes Specific to This Repo
 
-- 進捗と再発防止の知見は `/memories/repo/translation-notes.md` を優先参照する。
-- 技術運用は `.github/copilot-instructions.md`、翻訳方針は `docs/translation-instructions-ja.md` を基準にする。
-- 安全確認は `docs/message-translation-safety-checklist.md` を使う。
+- 常時適用ルール・技術運用は `AGENTS.md`、翻訳方針は `docs/translation-instructions-ja.md` を基準にする。
 
