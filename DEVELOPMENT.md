@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-20. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-21. -->
 <!--
   IMPORTANT POLICY FOR NetHackJP-ONLY MODIFICATIONS
   =================================================
@@ -441,13 +441,11 @@ GitHub CodeQL によるコードスキャン警告（Critical）を修正する�
    - **アップストリーム追従手順**:
      1. アップストリーム（本家）で同等のバッファサイズ変更やキャスト修正が入った場合は、本修正を削除して追従します。
 
-### 9. ステータスハイライトメニューにおけるキャンセル時の無限ループ修正
+### 9. ステータスハイライトメニューにおけるキャンセル時の無限ループ修正（上流追従済み）
 ステータスハイライトルール追加時 (`status_hilite_menu_add()`) に、文字列型フィールドや値入力のない動作で色選択をキャンセル（`-1`）した際、`goto choose_value` からそのまま `choose_color` に直線落下して即座に色選択が再表示される無限ループバグの修正です。
 
-* **マーカータグ**: `/* NetHackJP: Fix infinite loop on cancel in status_hilite_menu_add */`
-* **対象ファイル**:
-  - **`src/botl.c`**: `status_hilite_menu_add()` 内の色選択キャンセル判定を修正し、数値入力を行わない動作または文字列型フィールドの場合は `goto choose_behavior` へジャンプして動作選択メニューへ復帰するよう変更。
-* **アップストリーム追従手順**:
+* **状態**: アップストリーム 5.0.1（PR #1639 / `4857fccc7`）へ取り込まれたため、`src/botl.c` の独自マーカーコメント（`/* NetHackJP: Fix infinite loop on cancel in status_hilite_menu_add */`）を削除し、上流実装へ追従済み。
+* **対象ファイル**: `src/botl.c`
 ### 10. C23 規格 / GCC 14+ / Clang 18+ 基準でのビルド警告・型厳格化対応
 現代の C コンパイラ（GCC 14+ / Clang 18+）および C23 規格でのビルド厳格化に伴うコンパイルエラー・警告の解体と、マルチプラットフォーム（Linux / WSL, Android NDK, Windows MSVC）互換性を維持するための修正です。アップストリーム（本家 NetHack）のマージ時にコンフリクトが発生した場合は、以下の指針に従って競合解決を行ってください。
 
