@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-22. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-24. */
 /* $NHDT-Header: NetHack 5.0 pager.c 2026/06/20_22:26:43 NetHack-5.0:1.304 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Robert Patrick Rankin, 2018. */
@@ -2065,8 +2065,17 @@ do_screen_description(
             if (look_buf[0] != '\0')
                 *firstmatch = look_buf;
             if (*(*firstmatch)) {
-                Sprintf(temp_buf, " (%s", *firstmatch);
+                Snprintf(temp_buf, sizeof temp_buf, " (%s", *firstmatch);
                 (void) add_quoted_engraving(cc.x, cc.y, temp_buf, FALSE);
+                {
+                    /* a long engraving can fill temp_buf; leave room for
+                       ')' within what out_str can still take */
+                    int room = BUFSZ - 2 - (int) strlen(out_str);
+
+                    /* NetHackJP: avoid splitting a UTF-8 sequence on truncation */
+                    if ((int) strlen(temp_buf) > room)
+                        utf8_truncate(temp_buf, (size_t) max(room, 0));
+                }
                 Strcat(temp_buf, ")");
                 (void) strncat(out_str, temp_buf,
                                BUFSZ - strlen(out_str) - 1);

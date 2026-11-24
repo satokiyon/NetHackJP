@@ -1,4 +1,4 @@
-<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-22. -->
+<!-- Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-24. -->
 <!--
   IMPORTANT POLICY FOR NetHackJP-ONLY MODIFICATIONS
   =================================================
@@ -884,6 +884,17 @@ Xaw AsciiText の `XtNinternational=True` は WSLg/XWayland + fcitx5 構成で I
   7. **`dat/history_jp` / `dat/help_jp`**: 歴史ファイル末尾およびヘルプ冒頭に NetHackJP の説明・クレジットを追記。
 * **アップストリーム追従手順**:
   - 本件は NetHackJP 独自の派生版明示仕様であるため、アップストリームの著作権・バージョン表示・リソース変更との競合時はオリジナル表記を取り込みつつ NetHackJP 追記部分を維持する。
+
+### 34. 遠見（farlook）の長い刻印切り詰めにおける UTF-8 境界保護
+
+遠見（`;` コマンド等）の `do_screen_description()` で長い刻印を `BUFSZ` 内に切り詰める際、単純なバイト位置での NUL 終端（`temp_buf[max(room, 0)] = '\0'`）を行うと UTF-8 マルチバイト文字の途中で切断されて文字化けする問題を防止するための拡張です。
+
+* **マーカータグ**:
+  - `/* NetHackJP: avoid splitting a UTF-8 sequence on truncation */`
+* **対象ファイル**:
+  - **`src/pager.c`**: `do_screen_description()` 内の長い刻印切り詰め処理を `utf8_truncate(temp_buf, (size_t) max(room, 0))` に置換。
+* **アップストリーム追従手順**:
+  - 上流で `do_screen_description()` が UTF-8 境界を考慮した切り詰めに対応した場合は本独自拡張を取り消して追従する。
 ---
 
 ## 5. ライセンスと NetHack License 2(a) への対応方針

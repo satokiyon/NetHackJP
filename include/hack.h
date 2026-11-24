@@ -1,4 +1,4 @@
-/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-22. */
+/* Modified by NetHackJP contributor @satokiyon; latest change date: 2026-11-24. */
 /* $NHDT-Header: NetHack 5.0 hack.h 2026/10/27_11:20:36 NetHack-5.0:1.309 $ */
 /* Copyright (c) Stichting Mathematisch Centrum, Amsterdam, 1985. */
 /*-Copyright (c) Pasi Kallinen, 2017. */
@@ -317,6 +317,7 @@ struct _create_particular_data {
     int which;
     int fem;        /* -1, MALE, FEMALE, NEUTRAL */
     int genderconf;    /* conflicting gender */
+    int worm_segs;
     char monclass;
     boolean randmonst;
     boolean maketame, makepeaceful, makehostile;
@@ -1256,7 +1257,7 @@ typedef uint32_t mmflags_nht;     /* makemon MM_ flags */
  * need to retain the dmg value beyond that call scope.
  * Take care to ensure it doesn't get used more than once in other instances.
  */
-#define Maybe_Half_Phys(dmg) \
+#define Maybe_Adjust_Phys(dmg, otyp) \
     ((Half_physical_damage) ? (((dmg) + 1) / 2) : (dmg))
 
 /* flags for special ggetobj status returns */
